@@ -106,9 +106,11 @@ import io.getstream.chat.android.models.VideoCallToken
 import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
+import io.getstream.openapi.models.StreamChatCreateDeviceRequest
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
 import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSendMessageRequest
+import io.getstream.openapi.models.StreamChatSendReactionRequest
 import io.getstream.openapi.models.StreamChatUpdateMessagePartialRequest
 import io.getstream.openapi.models.StreamChatUpdateMessageRequest
 import io.getstream.result.Result
@@ -263,28 +265,31 @@ constructor(
     }
 
     override fun sendReaction(reaction: Reaction, enforceUnique: Boolean): Call<Reaction> {
-        return messageApi.sendReaction(
-            messageId = reaction.messageId,
-            request = ReactionRequest(
+        return defaultApi.sendReaction(
+            id = reaction.messageId,
+            request = StreamChatSendReactionRequest(
                 reaction = reaction.toDto(),
                 enforce_unique = enforceUnique,
             ),
-        ).map { response -> response.reaction.toDomain() }
+            //TODO: reaction shouldn't be nullable
+        ).map { response -> response.reaction!!.toDomain() }
     }
 
     override fun deleteReaction(
         messageId: String,
         reactionType: String,
     ): Call<Message> {
-        return messageApi.deleteReaction(
-            messageId = messageId,
-            reactionType = reactionType,
-        ).map { response -> response.message.toDomain() }
+        return defaultApi.deleteReaction(
+            id = messageId,
+            type = reactionType,
+            userId = null
+            //TODO: message shouldn't be nullable
+        ).map { response -> response.message!!.toDomain() }
     }
 
     override fun addDevice(device: Device): Call<Unit> {
-        return deviceApi.addDevices(
-            request = AddDeviceRequest(
+        return defaultApi.createDevice(
+            request = StreamChatCreateDeviceRequest(
                 device.token,
                 device.pushProvider.key,
                 device.providerName,
@@ -765,7 +770,7 @@ constructor(
     }
 
     override fun updateUsers(users: List<User>): Call<List<User>> {
-        val map: Map<String, UpstreamUserDto> = users.associateBy({ it.id }, User::toDto)
+        val map: Map<String, UpstreamUserDto> = users.associateBy({ it.id }, User::toDtoOld)
         return userApi.updateUsers(
             connectionId = connectionId,
             body = UpdateUsersRequest(map),

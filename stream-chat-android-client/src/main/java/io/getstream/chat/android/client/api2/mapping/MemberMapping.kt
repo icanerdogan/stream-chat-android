@@ -35,7 +35,7 @@ internal fun DownstreamMemberDto.toDomain(): Member =
 
 internal fun Member.toDto(): UpstreamMemberDto =
     UpstreamMemberDto(
-        user = user.toDto(),
+        user = user.toDtoOld(),
         created_at = createdAt,
         updated_at = updatedAt,
         invited = isInvited,

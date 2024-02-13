@@ -118,7 +118,7 @@ internal fun ConnectedEvent.toDto(): UpstreamConnectedEventDto {
     return UpstreamConnectedEventDto(
         type = this.type,
         created_at = createdAt,
-        me = me.toDto(),
+        me = me.toDtoOld(),
         connection_id = connectionId,
     )
 }

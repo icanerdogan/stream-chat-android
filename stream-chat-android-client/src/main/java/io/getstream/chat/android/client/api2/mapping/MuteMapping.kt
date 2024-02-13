@@ -22,8 +22,8 @@ import io.getstream.chat.android.models.Mute
 
 internal fun Mute.toDto(): UpstreamMuteDto =
     UpstreamMuteDto(
-        user = user.toDto(),
-        target = target.toDto(),
+        user = user.toDtoOld(),
+        target = target.toDtoOld(),
         created_at = createdAt,
         updated_at = updatedAt,
         expires = expires,

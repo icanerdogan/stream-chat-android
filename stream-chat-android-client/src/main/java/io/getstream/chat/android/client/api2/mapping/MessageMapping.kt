@@ -41,13 +41,13 @@ internal fun Message.toDtoOld(): UpstreamMessageDto =
         pin_expires = pinExpires,
         pinned = pinned,
         pinned_at = pinnedAt,
-        pinned_by = pinnedBy?.toDto(),
+        pinned_by = pinnedBy?.toDtoOld(),
         quoted_message_id = replyMessageId,
         shadowed = shadowed,
         show_in_channel = showInChannel,
         silent = silent,
         text = text,
-        thread_participants = threadParticipants.map(User::toDto),
+        thread_participants = threadParticipants.map(User::toDtoOld),
         extraData = extraData,
     )
 

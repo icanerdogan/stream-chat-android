@@ -21,11 +21,13 @@ import io.getstream.chat.android.client.api2.model.dto.DownstreamChannelMuteDto
 import io.getstream.chat.android.client.api2.model.dto.DownstreamMuteDto
 import io.getstream.chat.android.client.api2.model.dto.DownstreamUserDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamUserDto
+import io.getstream.chat.android.client.parser2.adapters.RawJson
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.User
 import io.getstream.openapi.models.StreamChatUserObject
+import io.getstream.openapi.models.StreamChatUserObjectRequest
 
-internal fun User.toDto(): UpstreamUserDto =
+internal fun User.toDtoOld(): UpstreamUserDto =
     UpstreamUserDto(
         banned = isBanned,
         id = id,
@@ -38,6 +40,25 @@ internal fun User.toDto(): UpstreamUserDto =
         teams = teams,
         extraData = extraData,
     )
+
+internal fun User.toDto(): StreamChatUserObjectRequest =
+    StreamChatUserObjectRequest(
+        //TODO: missing in spec
+        //banned = isBanned,
+        id = id,
+        //TODO: missing in spec
+        //name = name,
+        //TODO: missing in spec
+        //image = image,
+        invisible = isInvisible,
+        language = language,
+        role = role,
+        //TODO: missing in spec
+        //devices = devices.map(Device::toDto),
+        teams = teams,
+        custom = RawJson(extraData),
+    )
+
 
 internal fun DownstreamUserDto.toDomain(): User =
     User(

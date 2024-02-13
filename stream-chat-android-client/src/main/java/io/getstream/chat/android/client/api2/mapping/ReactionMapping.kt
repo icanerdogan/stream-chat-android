@@ -18,19 +18,35 @@ package io.getstream.chat.android.client.api2.mapping
 
 import io.getstream.chat.android.client.api2.model.dto.DownstreamReactionDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamReactionDto
+import io.getstream.chat.android.client.parser2.adapters.RawJson
 import io.getstream.chat.android.models.Reaction
 import io.getstream.openapi.models.StreamChatReaction
+import io.getstream.openapi.models.StreamChatReactionRequest
 
-internal fun Reaction.toDto(): UpstreamReactionDto =
+internal fun Reaction.toDtoOld(): UpstreamReactionDto =
     UpstreamReactionDto(
         created_at = createdAt,
         message_id = messageId,
         score = score,
         type = type,
         updated_at = updatedAt,
-        user = user?.toDto(),
+        user = user?.toDtoOld(),
         user_id = userId,
         extraData = extraData,
+    )
+
+internal fun Reaction.toDto(): StreamChatReactionRequest =
+    StreamChatReactionRequest(
+        // TODO: missing in spec
+        //created_at = createdAt,
+        message_id = messageId,
+        score = score,
+        type = type,
+        //TODO: mising in spec
+        //updated_at = updatedAt,
+        user = user?.toDto(),
+        user_id = userId,
+        custom = RawJson(extraData),
     )
 
 internal fun DownstreamReactionDto.toDomain(): Reaction =
