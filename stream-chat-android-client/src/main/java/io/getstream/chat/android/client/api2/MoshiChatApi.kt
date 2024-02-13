@@ -23,7 +23,6 @@ import io.getstream.chat.android.client.api.models.QueryChannelsRequest
 import io.getstream.chat.android.client.api.models.QueryUsersRequest
 import io.getstream.chat.android.client.api.models.SearchMessagesRequest
 import io.getstream.chat.android.client.api2.endpoint.ChannelApi
-import io.getstream.chat.android.client.api2.endpoint.ConfigApi
 import io.getstream.chat.android.client.api2.endpoint.DeviceApi
 import io.getstream.chat.android.client.api2.endpoint.FileDownloadApi
 import io.getstream.chat.android.client.api2.endpoint.GeneralApi
@@ -72,7 +71,6 @@ import io.getstream.chat.android.client.api2.model.requests.UpdateMessageRequest
 import io.getstream.chat.android.client.api2.model.requests.UpdateUsersRequest
 import io.getstream.chat.android.client.api2.model.requests.VideoCallCreateRequest
 import io.getstream.chat.android.client.api2.model.requests.VideoCallTokenRequest
-import io.getstream.chat.android.client.api2.model.response.AppSettingsResponse
 import io.getstream.chat.android.client.api2.model.response.BannedUserResponse
 import io.getstream.chat.android.client.api2.model.response.ChannelResponse
 import io.getstream.chat.android.client.api2.model.response.CreateVideoCallResponse
@@ -107,6 +105,7 @@ import io.getstream.chat.android.models.VideoCallToken
 import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
+import io.getstream.openapi.models.StreamChatGetApplicationResponse
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import io.getstream.result.call.CoroutineCall
@@ -125,7 +124,7 @@ internal class MoshiChatApi
 @Suppress("LongParameterList")
 constructor(
     private val fileUploader: FileUploader,
-    defaultApi: DefaultApi,
+    private val defaultApi: DefaultApi,
     private val userApi: UserApi,
     private val guestApi: GuestApi,
     private val messageApi: MessageApi,
@@ -133,7 +132,6 @@ constructor(
     private val deviceApi: DeviceApi,
     private val moderationApi: ModerationApi,
     private val generalApi: GeneralApi,
-    private val configApi: ConfigApi,
     private val callApi: VideoCallApi,
     private val fileDownloadApi: FileDownloadApi,
     private val coroutineScope: CoroutineScope,
@@ -181,7 +179,8 @@ constructor(
     }
 
     override fun appSettings(): Call<AppSettings> {
-        return configApi.getAppSettings().map(AppSettingsResponse::toDomain)
+        //TODO: The `StreamChatApp` model has a lot of fields that are marked as required but we don't get them
+        return defaultApi.getApp().map(StreamChatGetApplicationResponse::toDomain)
     }
 
     override fun sendMessage(

@@ -2961,7 +2961,8 @@ internal constructor(
     @Suppress("TooManyFunctions")
     public class Builder(private val apiKey: String, private val appContext: Context) : ChatClientBuilder() {
 
-        private var baseUrl: String = "chat.stream-io-api.com"
+        //private var baseUrl: String = "chat.stream-io-api.com"
+        private var baseUrl: String = "10.0.2.2:3030"
         private var cdnUrl: String = baseUrl
         private var logLevel = ChatLogLevel.NOTHING
         private var warmUp: Boolean = true
@@ -3192,7 +3193,8 @@ internal constructor(
             }
 
             // Use clear text traffic for instrumented tests
-            val isLocalHost = baseUrl.contains("localhost")
+            //val isLocalHost = baseUrl.contains("localhost")
+            val isLocalHost = baseUrl.contains("10.0.2.2")
             val httpProtocol = if (isLocalHost) "http" else "https"
             val wsProtocol = if (isLocalHost) "ws" else "wss"
             val lifecycle = ProcessLifecycleOwner.get().lifecycle
@@ -3201,7 +3203,8 @@ internal constructor(
                 apiKey = apiKey,
                 httpUrl = "$httpProtocol://$baseUrl/",
                 cdnHttpUrl = "$httpProtocol://$cdnUrl/",
-                wssUrl = "$wsProtocol://$baseUrl/",
+                //wssUrl = "$wsProtocol://$baseUrl/",
+                wssUrl = "$wsProtocol://10.0.2.2:8800/",
                 warmUp = warmUp,
                 loggerConfig = ChatLoggerConfigImpl(logLevel, loggerHandler),
                 distinctApiCalls = distinctApiCalls,

@@ -16,20 +16,20 @@
 
 package io.getstream.chat.android.client.api2.mapping
 
-import io.getstream.chat.android.client.api2.model.response.AppDto
-import io.getstream.chat.android.client.api2.model.response.AppSettingsResponse
-import io.getstream.chat.android.client.api2.model.response.FileUploadConfigDto
 import io.getstream.chat.android.models.App
 import io.getstream.chat.android.models.AppSettings
 import io.getstream.chat.android.models.FileUploadConfig
+import io.getstream.openapi.models.StreamChatApp
+import io.getstream.openapi.models.StreamChatFileUploadConfig
+import io.getstream.openapi.models.StreamChatGetApplicationResponse
 
-internal fun AppSettingsResponse.toDomain(): AppSettings {
+internal fun StreamChatGetApplicationResponse.toDomain(): AppSettings {
     return AppSettings(
         app = app.toDomain(),
     )
 }
 
-internal fun AppDto.toDomain(): App {
+internal fun StreamChatApp.toDomain(): App {
     return App(
         name = name,
         fileUploadConfig = file_upload_config.toDomain(),
@@ -37,7 +37,7 @@ internal fun AppDto.toDomain(): App {
     )
 }
 
-internal fun FileUploadConfigDto.toDomain(): FileUploadConfig {
+internal fun StreamChatFileUploadConfig.toDomain(): FileUploadConfig {
     return FileUploadConfig(
         allowedFileExtensions = allowed_file_extensions,
         allowedMimeTypes = allowed_mime_types,

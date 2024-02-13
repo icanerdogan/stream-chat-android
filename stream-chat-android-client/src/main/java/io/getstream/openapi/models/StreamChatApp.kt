@@ -8,7 +8,7 @@ internal data class StreamChatApp(
 
     public val async_url_enrich_enabled: Boolean,
 
-    public val campaign_enabled: Boolean,
+    public val campaign_enabled: Boolean = false,
 
     public val cdn_expiration_seconds: Int,
 

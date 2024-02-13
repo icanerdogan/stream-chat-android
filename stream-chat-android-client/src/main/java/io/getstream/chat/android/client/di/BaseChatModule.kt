@@ -39,7 +39,6 @@ import io.getstream.chat.android.client.api.internal.DistinctChatApiEnabler
 import io.getstream.chat.android.client.api.internal.ExtraDataValidator
 import io.getstream.chat.android.client.api2.MoshiChatApi
 import io.getstream.chat.android.client.api2.endpoint.ChannelApi
-import io.getstream.chat.android.client.api2.endpoint.ConfigApi
 import io.getstream.chat.android.client.api2.endpoint.DeviceApi
 import io.getstream.chat.android.client.api2.endpoint.FileDownloadApi
 import io.getstream.chat.android.client.api2.endpoint.GeneralApi
@@ -237,7 +236,6 @@ internal open class BaseChatModule(
         buildRetrofitApi<DeviceApi>(),
         buildRetrofitApi<ModerationApi>(),
         buildRetrofitApi<GeneralApi>(),
-        buildRetrofitApi<ConfigApi>(),
         buildRetrofitApi<VideoCallApi>(),
         buildRetrofitApi<FileDownloadApi>(),
         userScope,
