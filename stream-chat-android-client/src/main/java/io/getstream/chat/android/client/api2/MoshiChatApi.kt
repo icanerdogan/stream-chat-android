@@ -106,6 +106,7 @@ import io.getstream.chat.android.models.VideoCallInfo
 import io.getstream.chat.android.models.VideoCallToken
 import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
+import io.getstream.openapi.models.DefaultApi
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import io.getstream.result.call.CoroutineCall
@@ -124,6 +125,7 @@ internal class MoshiChatApi
 @Suppress("LongParameterList")
 constructor(
     private val fileUploader: FileUploader,
+    defaultApi: DefaultApi,
     private val userApi: UserApi,
     private val guestApi: GuestApi,
     private val messageApi: MessageApi,

@@ -71,6 +71,7 @@ import io.getstream.chat.android.client.uploader.FileUploader
 import io.getstream.chat.android.client.uploader.StreamFileUploader
 import io.getstream.chat.android.client.user.CurrentUserFetcher
 import io.getstream.log.StreamLog
+import io.getstream.openapi.models.DefaultApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
@@ -228,6 +229,7 @@ internal open class BaseChatModule(
     @Suppress("RemoveExplicitTypeArguments")
     private fun buildApi(chatConfig: ChatClientConfig): ChatApi = MoshiChatApi(
         fileUploader ?: defaultFileUploader,
+        buildRetrofitApi<DefaultApi>(),
         buildRetrofitApi<UserApi>(),
         buildRetrofitApi<GuestApi>(),
         buildRetrofitApi<MessageApi>(),

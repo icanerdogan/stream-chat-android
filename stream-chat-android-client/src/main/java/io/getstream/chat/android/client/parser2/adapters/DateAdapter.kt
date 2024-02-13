@@ -16,6 +16,8 @@
 
 package io.getstream.chat.android.client.parser2.adapters
 
+import android.annotation.SuppressLint
+import android.util.Log
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
@@ -23,6 +25,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 import io.getstream.chat.android.client.parser2.adapters.internal.StreamDateFormatter
 import io.getstream.chat.android.core.internal.InternalStreamChatApi
+import java.time.Instant
 import java.util.Date
 
 @InternalStreamChatApi
@@ -35,11 +38,16 @@ public class DateAdapter : JsonAdapter<Date>() {
         if (value == null) {
             writer.nullValue()
         } else {
-            val rawValue = streamDateFormatter.format(value)
-            writer.value(rawValue)
+            try {
+                val rawValue = streamDateFormatter.format(value)
+                writer.value(rawValue)
+            } catch (e: Exception) {
+                Log.e("test3", "Issue")
+            }
         }
     }
 
+    @SuppressLint("NewApi")
     @Suppress("TooGenericExceptionCaught")
     @FromJson
     override fun fromJson(reader: JsonReader): Date? {
@@ -49,7 +57,13 @@ public class DateAdapter : JsonAdapter<Date>() {
             return null
         }
 
-        val rawValue = reader.nextString()
-        return streamDateFormatter.parse(rawValue)
+        // TODO: Remove string reading once all dates are in unix timestamps
+        val value = reader.nextString()
+        val longValue = value.toLongOrNull()
+        return if (longValue != null) {
+            Date(longValue / 1_000_000)
+        } else {
+            streamDateFormatter.parse(value)
+        }
     }
 }

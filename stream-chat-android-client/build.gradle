@@ -90,6 +90,7 @@ dependencies {
     api Dependencies.streamPushPermissions
     implementation Dependencies.ituDate
     implementation Dependencies.moshi
+    implementation Dependencies.moshiAdapters
     implementation Dependencies.retrofitMoshiConverter
     ksp Dependencies.moshiCodegen
     implementation Dependencies.okhttpLoggingInterceptor

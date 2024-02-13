@@ -29,6 +29,7 @@ import io.getstream.chat.android.client.events.ConnectedEvent
 import io.getstream.chat.android.client.extensions.internal.enrichIfNeeded
 import io.getstream.chat.android.client.parser.ChatParser
 import io.getstream.chat.android.client.parser2.adapters.AttachmentDtoAdapter
+import io.getstream.chat.android.client.parser2.adapters.CustomObjectDtoAdapter
 import io.getstream.chat.android.client.parser2.adapters.DateAdapter
 import io.getstream.chat.android.client.parser2.adapters.DownstreamChannelDtoAdapter
 import io.getstream.chat.android.client.parser2.adapters.DownstreamMessageDtoAdapter
@@ -37,6 +38,7 @@ import io.getstream.chat.android.client.parser2.adapters.DownstreamReactionDtoAd
 import io.getstream.chat.android.client.parser2.adapters.DownstreamUserDtoAdapter
 import io.getstream.chat.android.client.parser2.adapters.EventAdapterFactory
 import io.getstream.chat.android.client.parser2.adapters.ExactDateAdapter
+import io.getstream.chat.android.client.parser2.adapters.GenericCustomDtoAdapter
 import io.getstream.chat.android.client.parser2.adapters.UpstreamChannelDtoAdapter
 import io.getstream.chat.android.client.parser2.adapters.UpstreamMessageDtoAdapter
 import io.getstream.chat.android.client.parser2.adapters.UpstreamReactionDtoAdapter
@@ -63,6 +65,7 @@ internal class MoshiChatParser : ChatParser {
             .add(UpstreamReactionDtoAdapter)
             .add(DownstreamUserDtoAdapter)
             .add(UpstreamUserDtoAdapter)
+            .add(GenericCustomDtoAdapter)
             .build()
     }
 
