@@ -19,6 +19,7 @@ package io.getstream.chat.android.client.api2.mapping
 import io.getstream.chat.android.client.api2.model.dto.DownstreamReactionDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamReactionDto
 import io.getstream.chat.android.models.Reaction
+import io.getstream.openapi.models.StreamChatReaction
 
 internal fun Reaction.toDto(): UpstreamReactionDto =
     UpstreamReactionDto(
@@ -42,4 +43,17 @@ internal fun DownstreamReactionDto.toDomain(): Reaction =
         user = user?.toDomain(),
         userId = user_id,
         extraData = extraData.toMutableMap(),
+    )
+
+internal fun StreamChatReaction.toDomain(): Reaction =
+    Reaction(
+        createdAt = created_at,
+        messageId = message_id,
+        score = score,
+        type = type,
+        updatedAt = updated_at,
+        user = user?.toDomain(),
+        //TODO: this shouldn't be optional
+        userId = user_id!!,
+        extraData = custom.toMutableMap(),
     )

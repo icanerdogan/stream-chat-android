@@ -33,6 +33,7 @@ import io.getstream.chat.android.client.api2.endpoint.UserApi
 import io.getstream.chat.android.client.api2.endpoint.VideoCallApi
 import io.getstream.chat.android.client.api2.mapping.toDomain
 import io.getstream.chat.android.client.api2.mapping.toDto
+import io.getstream.chat.android.client.api2.mapping.toDtoOld
 import io.getstream.chat.android.client.api2.model.dto.ChatEventDto
 import io.getstream.chat.android.client.api2.model.dto.DeviceDto
 import io.getstream.chat.android.client.api2.model.dto.DownstreamMemberDto
@@ -61,7 +62,6 @@ import io.getstream.chat.android.client.api2.model.requests.RejectInviteRequest
 import io.getstream.chat.android.client.api2.model.requests.RemoveMembersRequest
 import io.getstream.chat.android.client.api2.model.requests.SendActionRequest
 import io.getstream.chat.android.client.api2.model.requests.SendEventRequest
-import io.getstream.chat.android.client.api2.model.requests.SendMessageRequest
 import io.getstream.chat.android.client.api2.model.requests.SyncHistoryRequest
 import io.getstream.chat.android.client.api2.model.requests.TruncateChannelRequest
 import io.getstream.chat.android.client.api2.model.requests.UpdateChannelPartialRequest
@@ -106,6 +106,7 @@ import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
+import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import io.getstream.result.call.CoroutineCall
@@ -188,10 +189,10 @@ constructor(
         channelId: String,
         message: Message,
     ): Call<Message> {
-        return messageApi.sendMessage(
-            channelType = channelType,
-            channelId = channelId,
-            message = SendMessageRequest(
+        return defaultApi.sendMessage(
+            type = channelType,
+            id = channelId,
+            request = StreamChatSendMessageRequest(
                 message = message.toDto(),
                 skip_push = message.skipPushNotification,
                 skip_enrich_url = message.skipEnrichUrl,
@@ -205,7 +206,7 @@ constructor(
         return messageApi.updateMessage(
             messageId = message.id,
             message = UpdateMessageRequest(
-                message = message.toDto(),
+                message = message.toDtoOld(),
                 skip_enrich_url = message.skipEnrichUrl,
             ),
         ).map { response -> response.message.toDomain() }
@@ -570,7 +571,7 @@ constructor(
         return channelApi.updateChannel(
             channelType = channelType,
             channelId = channelId,
-            body = UpdateChannelRequest(extraData, updateMessage?.toDto()),
+            body = UpdateChannelRequest(extraData, updateMessage?.toDtoOld()),
         ).map(this::flattenChannel)
     }
 
@@ -618,7 +619,7 @@ constructor(
         return channelApi.truncateChannel(
             channelType = channelType,
             channelId = channelId,
-            body = TruncateChannelRequest(message = systemMessage?.toDto()),
+            body = TruncateChannelRequest(message = systemMessage?.toDtoOld()),
         ).map(this::flattenChannel)
     }
 
@@ -680,7 +681,7 @@ constructor(
         return channelApi.addMembers(
             channelType = channelType,
             channelId = channelId,
-            body = AddMembersRequest(members, systemMessage?.toDto(), hideHistory, skipPush),
+            body = AddMembersRequest(members, systemMessage?.toDtoOld(), hideHistory, skipPush),
         ).map(this::flattenChannel)
     }
 
@@ -694,7 +695,7 @@ constructor(
         return channelApi.removeMembers(
             channelType = channelType,
             channelId = channelId,
-            body = RemoveMembersRequest(members, systemMessage?.toDto(), skipPush),
+            body = RemoveMembersRequest(members, systemMessage?.toDtoOld(), skipPush),
         ).map(this::flattenChannel)
     }
 
@@ -708,7 +709,7 @@ constructor(
         return channelApi.inviteMembers(
             channelType = channelType,
             channelId = channelId,
-            body = InviteMembersRequest(members, systemMessage?.toDto(), skipPush),
+            body = InviteMembersRequest(members, systemMessage?.toDtoOld(), skipPush),
         ).map(this::flattenChannel)
     }
 

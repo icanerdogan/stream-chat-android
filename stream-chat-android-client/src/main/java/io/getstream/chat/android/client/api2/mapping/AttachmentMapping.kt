@@ -18,8 +18,10 @@ package io.getstream.chat.android.client.api2.mapping
 
 import io.getstream.chat.android.client.api2.model.dto.AttachmentDto
 import io.getstream.chat.android.models.Attachment
+import io.getstream.openapi.models.StreamChatAttachment
+import io.getstream.openapi.models.StreamChatAttachmentRequest
 
-internal fun Attachment.toDto(): AttachmentDto =
+internal fun Attachment.toDtoOld(): AttachmentDto =
     AttachmentDto(
         asset_url = assetUrl,
         author_name = authorName,
@@ -40,6 +42,30 @@ internal fun Attachment.toDto(): AttachmentDto =
         original_height = originalHeight,
         original_width = originalWidth,
         extraData = extraData,
+    )
+
+internal fun Attachment.toDto(): StreamChatAttachmentRequest =
+    StreamChatAttachmentRequest(
+        asset_url = assetUrl,
+        author_name = authorName,
+        fallback = fallback,
+        //TODO:
+        //file_size = fileSize,
+        //image = image,
+        image_url = imageUrl,
+        //mime_type = mimeType,
+        //name = name,
+        og_scrape_url = ogUrl,
+        text = text,
+        thumb_url = thumbUrl,
+        title = title,
+        title_link = titleLink,
+        author_link = authorLink,
+        type = type,
+        //url = url,
+        original_height = originalHeight,
+        original_width = originalWidth,
+        //extraData = extraData,
     )
 
 internal fun AttachmentDto.toDomain(): Attachment =
@@ -63,4 +89,28 @@ internal fun AttachmentDto.toDomain(): Attachment =
         originalHeight = original_height,
         originalWidth = original_width,
         extraData = extraData.toMutableMap(),
+    )
+
+internal fun StreamChatAttachment.toDomain(): Attachment =
+    Attachment(
+        assetUrl = asset_url,
+        authorName = author_name,
+        authorLink = author_link,
+        fallback = fallback,
+        //TODO:
+        //fileSize = file_size,
+        //image = image,
+        imageUrl = image_url,
+        //mimeType = mime_type,
+        //name = name,
+        ogUrl = og_scrape_url,
+        text = text,
+        thumbUrl = thumb_url,
+        title = title,
+        titleLink = title_link,
+        type = type,
+        //url = url,
+        originalHeight = original_height,
+        originalWidth = original_width,
+        //extraData = extraData.toMutableMap(),
     )

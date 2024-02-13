@@ -21,7 +21,6 @@ import io.getstream.chat.android.client.api.QueryParams
 import io.getstream.chat.android.client.api2.model.requests.PartialUpdateMessageRequest
 import io.getstream.chat.android.client.api2.model.requests.ReactionRequest
 import io.getstream.chat.android.client.api2.model.requests.SendActionRequest
-import io.getstream.chat.android.client.api2.model.requests.SendMessageRequest
 import io.getstream.chat.android.client.api2.model.requests.UpdateMessageRequest
 import io.getstream.chat.android.client.api2.model.response.MessageResponse
 import io.getstream.chat.android.client.api2.model.response.MessagesResponse
@@ -40,16 +39,6 @@ import retrofit2.http.Query
 @Suppress("TooManyFunctions")
 @AuthenticatedApi
 internal interface MessageApi {
-
-    /**
-     * [REST documentation](https://getstream.io/chat/docs/rest/#messages-sendmessage)
-     */
-    @POST("/channels/{type}/{id}/message")
-    fun sendMessage(
-        @Path("type") channelType: String,
-        @Path("id") channelId: String,
-        @Body message: SendMessageRequest,
-    ): RetrofitCall<MessageResponse>
 
     @GET("/messages/{id}")
     fun getMessage(@Path("id") messageId: String): RetrofitCall<MessageResponse>

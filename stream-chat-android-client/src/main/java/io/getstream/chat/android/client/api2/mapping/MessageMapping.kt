@@ -24,10 +24,14 @@ import io.getstream.chat.android.client.api2.model.dto.UpstreamMessageDto
 import io.getstream.chat.android.models.Attachment
 import io.getstream.chat.android.models.Message
 import io.getstream.chat.android.models.User
+import io.getstream.openapi.models.StreamChatAttachment
+import io.getstream.openapi.models.StreamChatMessage
+import io.getstream.openapi.models.StreamChatMessageRequest
+import io.getstream.openapi.models.StreamChatUserObject
 
-internal fun Message.toDto(): UpstreamMessageDto =
+internal fun Message.toDtoOld(): UpstreamMessageDto =
     UpstreamMessageDto(
-        attachments = attachments.map(Attachment::toDto),
+        attachments = attachments.map(Attachment::toDtoOld),
         cid = cid,
         command = command,
         html = html,
@@ -45,6 +49,21 @@ internal fun Message.toDto(): UpstreamMessageDto =
         text = text,
         thread_participants = threadParticipants.map(User::toDto),
         extraData = extraData,
+    )
+
+internal fun Message.toDto(): StreamChatMessageRequest =
+    StreamChatMessageRequest(
+        attachments = attachments.map(Attachment::toDto),
+        id = id,
+        mentioned_users = mentionedUsersIds,
+        parent_id = parentId,
+        pin_expires = pinExpires,
+        pinned = pinned,
+        pinned_at = pinnedAt,
+        quoted_message_id = replyMessageId,
+        show_in_channel = showInChannel,
+        silent = silent,
+        text = text,
     )
 
 internal fun DownstreamMessageDto.toDomain(): Message =
@@ -82,4 +101,49 @@ internal fun DownstreamMessageDto.toDomain(): Message =
         user = user.toDomain(),
         moderationDetails = moderation_details?.toDomain(),
         extraData = extraData.toMutableMap(),
+    )
+
+
+internal fun StreamChatMessage.toDomain(): Message =
+    Message(
+        attachments = attachments.mapTo(mutableListOf(), { it -> it!!.toDomain()}),
+        //TODO: this is missing in the spec
+        //channelInfo = channel?.toDomain(),
+        channelInfo = null,
+        cid = cid,
+        command = command,
+        createdAt = created_at,
+        deletedAt = deleted_at,
+        html = html,
+        i18n = i18n.orEmpty(),
+        id = id,
+        //TODO: list shouldn't contain nullable items
+        latestReactions = latest_reactions.mapTo(mutableListOf(), { it -> it!!.toDomain()}),
+        //TODO: list shouldn't contain nullable items
+        mentionedUsers = mentioned_users.mapTo(mutableListOf(), { it -> it.toDomain()}),
+        //TODO: list shouldn't contain nullable items
+        ownReactions = own_reactions.mapTo(mutableListOf(), { it -> it!!.toDomain()}),
+        parentId = parent_id,
+        pinExpires = pin_expires,
+        pinned = pinned,
+        pinnedAt = pinned_at,
+        pinnedBy = pinned_by?.toDomain(),
+        reactionCounts = reaction_counts.orEmpty().toMutableMap(),
+        reactionScores = reaction_scores.orEmpty().toMutableMap(),
+        replyCount = reply_count,
+        deletedReplyCount = deleted_reply_count,
+        replyMessageId = quoted_message_id,
+        replyTo = quoted_message?.toDomain(),
+        shadowed = shadowed,
+        showInChannel = show_in_channel ?: false,
+        silent = silent,
+        text = text,
+        threadParticipants = thread_participants.orEmpty().map(StreamChatUserObject::toDomain),
+        type = type,
+        updatedAt = updated_at,
+        //TODO: user is not expected to be nullable
+        user = user!!.toDomain(),
+        //TODO: missing in spec
+        //moderationDetails = moderation_details?.toDomain(),
+        extraData = custom.toMutableMap(),
     )

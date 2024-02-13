@@ -23,6 +23,7 @@ import io.getstream.chat.android.client.api2.model.dto.DownstreamUserDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamUserDto
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.User
+import io.getstream.openapi.models.StreamChatUserObject
 
 internal fun User.toDto(): UpstreamUserDto =
     UpstreamUserDto(
@@ -59,4 +60,40 @@ internal fun DownstreamUserDto.toDomain(): User =
         teams = teams,
         channelMutes = channel_mutes.orEmpty().map(DownstreamChannelMuteDto::toDomain),
         extraData = extraData.toMutableMap(),
+    )
+
+internal fun StreamChatUserObject.toDomain(): User =
+    User(
+        id = id,
+        //TODO missing name
+        //name = name ?: "",
+        name = "",
+        //TODO missing image
+        //image = image ?: "",
+        image = "",
+        //TODO role should not be nullable?
+        role = role ?: "",
+        invisible = invisible,
+        language = language ?: "",
+        banned = banned,
+        // TODO missing devices
+        //devices = devices.orEmpty().map(DeviceDto::toDomain),
+        devices = emptyList(),
+        //TODO:
+        online = online ?: false,
+        createdAt = created_at,
+        deactivatedAt = deactivated_at,
+        updatedAt = updated_at,
+        lastActive = last_active,
+        //TODO: missing total_unread_count
+        totalUnreadCount = 0,
+        //TODO: missing unread_channels
+        unreadChannels = 0,
+        //TODO: missing mutes
+        mutes = emptyList(),
+        //TODO: teams should not be nullable
+        teams = teams.orEmpty(),
+        //TODO: missing channel_mutes
+        channelMutes = emptyList(),
+        extraData = custom.orEmpty().toMutableMap(),
     )
