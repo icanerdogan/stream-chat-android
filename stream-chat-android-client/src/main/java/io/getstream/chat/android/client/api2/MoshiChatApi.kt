@@ -81,6 +81,7 @@ import io.getstream.chat.android.client.extensions.enrichWithCid
 import io.getstream.chat.android.client.extensions.syncUnreadCountWithReads
 import io.getstream.chat.android.client.helpers.CallPostponeHelper
 import io.getstream.chat.android.client.parser.toMap
+import io.getstream.chat.android.client.parser2.adapters.RawJson
 import io.getstream.chat.android.client.scope.UserScope
 import io.getstream.chat.android.client.uploader.FileUploader
 import io.getstream.chat.android.client.utils.ProgressCallback
@@ -106,7 +107,10 @@ import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
+import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSendMessageRequest
+import io.getstream.openapi.models.StreamChatUpdateMessagePartialRequest
+import io.getstream.openapi.models.StreamChatUpdateMessageRequest
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import io.getstream.result.call.CoroutineCall
@@ -203,10 +207,10 @@ constructor(
     override fun updateMessage(
         message: Message,
     ): Call<Message> {
-        return messageApi.updateMessage(
-            messageId = message.id,
-            message = UpdateMessageRequest(
-                message = message.toDtoOld(),
+        return defaultApi.updateMessage(
+            id = message.id,
+            request = StreamChatUpdateMessageRequest(
+                message = message.toDto(),
                 skip_enrich_url = message.skipEnrichUrl,
             ),
         ).map { response -> response.message.toDomain() }
@@ -218,10 +222,10 @@ constructor(
         unset: List<String>,
         skipEnrichUrl: Boolean,
     ): Call<Message> {
-        return messageApi.partialUpdateMessage(
-            messageId = messageId,
-            body = PartialUpdateMessageRequest(
-                set = set,
+        return defaultApi.updateMessagePartial(
+            id = messageId,
+            request = StreamChatUpdateMessagePartialRequest(
+                set = RawJson(set),
                 unset = unset,
                 skip_enrich_url = skipEnrichUrl,
             ),
@@ -229,16 +233,20 @@ constructor(
     }
 
     override fun getMessage(messageId: String): Call<Message> {
-        return messageApi.getMessage(
-            messageId = messageId,
-        ).map { response -> response.message.toDomain() }
+        return defaultApi.getMessage(
+            id = messageId,
+            //TODO: message shoudln't be nullable?
+        ).map { response -> response.message!!.toDomain() }
     }
 
     override fun deleteMessage(messageId: String, hard: Boolean): Call<Message> {
-        return messageApi.deleteMessage(
-            messageId = messageId,
+        return defaultApi.deleteMessage(
+            id = messageId,
             hard = if (hard) true else null,
-        ).map { response -> response.message.toDomain() }
+            //TODO: this deleted_by was never set so far)
+            deletedBy = null
+            //TODO: response message should not be null
+        ).map { response -> response.message!!.toDomain() }
     }
 
     override fun getReactions(
@@ -246,11 +254,12 @@ constructor(
         offset: Int,
         limit: Int,
     ): Call<List<Reaction>> {
-        return messageApi.getReactions(
-            messageId = messageId,
+        return defaultApi.getReactions(
+            id = messageId,
             offset = offset,
             limit = limit,
-        ).map { response -> response.reactions.map(DownstreamReactionDto::toDomain) }
+            //TODO: list of reactions shouldn't contain nullable items
+        ).map { response -> response.reactions.map{ it -> it!!.toDomain()} }
     }
 
     override fun sendReaction(reaction: Reaction, enforceUnique: Boolean): Call<Reaction> {
