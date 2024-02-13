@@ -107,6 +107,7 @@ import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
 import io.getstream.openapi.models.StreamChatCreateDeviceRequest
+import io.getstream.openapi.models.StreamChatDevice
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
 import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSendMessageRequest
@@ -298,11 +299,11 @@ constructor(
     }
 
     override fun deleteDevice(device: Device): Call<Unit> {
-        return deviceApi.deleteDevice(deviceId = device.token).toUnitCall()
+        return defaultApi.deleteDevice(id = device.token, userId = null).toUnitCall()
     }
 
     override fun getDevices(): Call<List<Device>> {
-        return deviceApi.getDevices().map { response -> response.devices.map(DeviceDto::toDomain) }
+        return defaultApi.listDevices(userId = null).map { response -> response.devices.map(StreamChatDevice::toDomain) }
     }
 
     override fun muteCurrentUser(): Call<Mute> {

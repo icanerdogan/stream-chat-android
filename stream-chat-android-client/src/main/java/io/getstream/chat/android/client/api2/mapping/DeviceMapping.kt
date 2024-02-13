@@ -19,6 +19,7 @@ package io.getstream.chat.android.client.api2.mapping
 import io.getstream.chat.android.client.api2.model.dto.DeviceDto
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.PushProvider
+import io.getstream.openapi.models.StreamChatDevice
 
 internal fun Device.toDto(): DeviceDto =
     DeviceDto(
@@ -32,4 +33,11 @@ internal fun DeviceDto.toDomain(): Device =
         token = id,
         pushProvider = PushProvider.fromKey(push_provider),
         providerName = provider_name,
+    )
+
+internal fun StreamChatDevice.toDomain(): Device =
+    Device(
+        token = id,
+        pushProvider = PushProvider.fromKey(push_provider),
+        providerName = push_provider_name,
     )
