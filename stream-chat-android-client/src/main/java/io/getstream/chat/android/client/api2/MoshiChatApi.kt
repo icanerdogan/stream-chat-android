@@ -106,12 +106,18 @@ import io.getstream.chat.android.models.VideoCallToken
 import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
+import io.getstream.openapi.models.StreamChatBanRequest
 import io.getstream.openapi.models.StreamChatCreateDeviceRequest
 import io.getstream.openapi.models.StreamChatDevice
+import io.getstream.openapi.models.StreamChatFlagRequest
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
+import io.getstream.openapi.models.StreamChatMuteChannelRequest
+import io.getstream.openapi.models.StreamChatMuteUserRequest
 import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.openapi.models.StreamChatSendReactionRequest
+import io.getstream.openapi.models.StreamChatUnmuteChannelRequest
+import io.getstream.openapi.models.StreamChatUnmuteUserRequest
 import io.getstream.openapi.models.StreamChatUpdateMessagePartialRequest
 import io.getstream.openapi.models.StreamChatUpdateMessageRequest
 import io.getstream.result.Result
@@ -321,19 +327,22 @@ constructor(
         userId: String,
         timeout: Int?,
     ): Call<Mute> {
-        return moderationApi.muteUser(
-            body = MuteUserRequest(
-                target_id = userId,
+        return defaultApi.muteUser(
+            request = StreamChatMuteUserRequest(
+                target_ids = listOf(userId),
                 user_id = this.userId,
                 timeout = timeout,
             ),
-        ).map { response -> response.mute.toDomain() }
+            //TODO: mute shouldn't be nullable
+        ).map { response -> response.mute!!.toDomain() }
     }
 
     override fun unmuteUser(userId: String): Call<Unit> {
-        return moderationApi.unmuteUser(
-            body = MuteUserRequest(
+        return defaultApi.unmuteUser(
+            request = StreamChatUnmuteUserRequest(
                 target_id = userId,
+                //TODO: this is a new field from spec
+                target_ids = emptyList(),
                 user_id = this.userId,
                 timeout = null,
             ),
@@ -345,9 +354,9 @@ constructor(
         channelId: String,
         expiration: Int?,
     ): Call<Unit> {
-        return moderationApi.muteChannel(
-            body = MuteChannelRequest(
-                channel_cid = "$channelType:$channelId",
+        return defaultApi.muteChannel(
+            request = StreamChatMuteChannelRequest(
+                channel_cids = listOf("$channelType:$channelId"),
                 expiration = expiration,
             ),
         ).toUnitCall()
@@ -357,9 +366,11 @@ constructor(
         channelType: String,
         channelId: String,
     ): Call<Unit> {
-        return moderationApi.unmuteChannel(
-            body = MuteChannelRequest(
+        return defaultApi.unmuteChannel(
+            //TODO: why is there also a channel_cids?
+            request = StreamChatUnmuteChannelRequest(
                 channel_cid = "$channelType:$channelId",
+                channel_cids = emptyList(),
                 expiration = null,
             ),
         ).toUnitCall()
@@ -445,10 +456,11 @@ constructor(
         flag(mutableMapOf("target_user_id" to userId))
 
     override fun unflagUser(userId: String): Call<Flag> =
+        //TODO: unflag missing!
         unflag(mutableMapOf("target_user_id" to userId))
 
     override fun flagMessage(messageId: String): Call<Flag> =
-        flag(mutableMapOf("target_message_id" to messageId))
+        defaultApi.flag(request = StreamChatFlagRequest(target_message_id = messageId)).map { response -> response.flag!!.toDomain() }
 
     override fun unflagMessage(messageId: String): Call<Flag> =
         unflag(mutableMapOf("target_message_id" to messageId))
@@ -469,8 +481,8 @@ constructor(
         channelId: String,
         shadow: Boolean,
     ): Call<Unit> {
-        return moderationApi.banUser(
-            body = BanUserRequest(
+        return defaultApi.ban(
+            request = StreamChatBanRequest(
                 target_user_id = targetId,
                 timeout = timeout,
                 reason = reason,
@@ -487,11 +499,14 @@ constructor(
         channelId: String,
         shadow: Boolean,
     ): Call<Unit> {
-        return moderationApi.unbanUser(
+        return defaultApi.unban(
             targetUserId = targetId,
-            channelId = channelId,
-            channelType = channelType,
-            shadow = shadow,
+            id = channelId,
+            type = channelType,
+            //TODO: new parameter?
+            createdBy = null
+            //TODO: missing
+            //shadow = shadow,
         ).toUnitCall()
     }
 

@@ -19,6 +19,7 @@ package io.getstream.chat.android.client.api2.mapping
 import io.getstream.chat.android.client.api2.model.dto.DownstreamMuteDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamMuteDto
 import io.getstream.chat.android.models.Mute
+import io.getstream.openapi.models.StreamChatUserMute
 
 internal fun Mute.toDto(): UpstreamMuteDto =
     UpstreamMuteDto(
@@ -29,10 +30,21 @@ internal fun Mute.toDto(): UpstreamMuteDto =
         expires = expires,
     )
 
-internal fun DownstreamMuteDto.toDomain(): Mute =
+internal fun DownstreamMuteDto.toDomainOld(): Mute =
     Mute(
         user = user.toDomain(),
         target = target.toDomain(),
+        createdAt = created_at,
+        updatedAt = updated_at,
+        expires = expires,
+    )
+
+internal fun StreamChatUserMute.toDomain(): Mute =
+    Mute(
+        //TODO: user shouldn't be nullable
+        user = user!!.toDomain(),
+        //TODO: target shouldn't be nullable
+        target = target!!.toDomain(),
         createdAt = created_at,
         updatedAt = updated_at,
         expires = expires,

@@ -18,13 +18,29 @@ package io.getstream.chat.android.client.api2.mapping
 
 import io.getstream.chat.android.client.api2.model.dto.DownstreamFlagDto
 import io.getstream.chat.android.models.Flag
+import io.getstream.openapi.models.StreamChatFlag
 
 internal fun DownstreamFlagDto.toDomain(): Flag {
     return Flag(
         user = user.toDomain(),
         targetUser = target_user?.toDomain(),
         targetMessageId = target_message_id,
-        reviewedBy = created_at,
+        createdByAutomod = created_by_automod,
+        createdAt = approved_at,
+        updatedAt = updated_at,
+        reviewedAt = reviewed_at,
+        approvedAt = approved_at,
+        rejectedAt = rejected_at,
+    )
+}
+
+internal fun StreamChatFlag.toDomain(): Flag {
+    return Flag(
+        //TODO: shouldn't be null
+        user = user!!.toDomain(),
+        targetUser = target_user?.toDomain(),
+        //TODO: shouldn't be null
+        targetMessageId = target_message_id!!,
         createdByAutomod = created_by_automod,
         createdAt = approved_at,
         updatedAt = updated_at,
