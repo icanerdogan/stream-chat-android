@@ -671,11 +671,16 @@ constructor(
     }
 
     override fun rejectInvite(channelType: String, channelId: String): Call<Channel> {
-        return channelApi.rejectInvite(
-            channelType = channelType,
-            channelId = channelId,
-            body = RejectInviteRequest(),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelRequest(
+                reject_invite = true,
+                add_moderators = emptyList(),
+                demote_moderators = emptyList(),
+                remove_members = emptyList()
+            ),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun acceptInvite(
