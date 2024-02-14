@@ -577,7 +577,7 @@ public class ChannelClient internal constructor(
      * @return Executable async [Call] responsible for enabling slow mode.
      */
     @CheckResult
-    public fun enableSlowMode(cooldownTimeInSeconds: Int): Call<Channel> =
+    public fun enableSlowMode(cooldownTimeInSeconds: Int): Call<Unit> =
         client.enableSlowMode(channelType, channelId, cooldownTimeInSeconds)
 
     /**
@@ -586,7 +586,7 @@ public class ChannelClient internal constructor(
      * @return Executable async [Call] responsible for disabling slow mode.
      */
     @CheckResult
-    public fun disableSlowMode(): Call<Channel> =
+    public fun disableSlowMode(): Call<Unit> =
         client.disableSlowMode(channelType, channelId)
 
     /**

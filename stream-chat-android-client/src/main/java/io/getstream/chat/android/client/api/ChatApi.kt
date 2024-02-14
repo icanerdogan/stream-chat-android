@@ -236,13 +236,13 @@ internal interface ChatApi {
         channelType: String,
         channelId: String,
         cooldownTimeInSeconds: Int,
-    ): Call<Channel>
+    ): Call<Unit>
 
     @CheckResult
     fun disableSlowMode(
         channelType: String,
         channelId: String,
-    ): Call<Channel>
+    ): Call<Unit>
 
     @CheckResult
     fun markRead(

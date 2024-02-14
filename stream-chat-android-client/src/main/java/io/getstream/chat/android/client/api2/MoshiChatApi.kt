@@ -107,6 +107,7 @@ import io.getstream.chat.android.models.querysort.QuerySorter
 import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
 import io.getstream.openapi.models.StreamChatBanRequest
+import io.getstream.openapi.models.StreamChatChannelMember
 import io.getstream.openapi.models.StreamChatCreateDeviceRequest
 import io.getstream.openapi.models.StreamChatDevice
 import io.getstream.openapi.models.StreamChatFlagRequest
@@ -118,6 +119,8 @@ import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.openapi.models.StreamChatSendReactionRequest
 import io.getstream.openapi.models.StreamChatUnmuteChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteUserRequest
+import io.getstream.openapi.models.StreamChatUpdateChannelPartialRequest
+import io.getstream.openapi.models.StreamChatUpdateChannelPartialResponse
 import io.getstream.openapi.models.StreamChatUpdateMessagePartialRequest
 import io.getstream.openapi.models.StreamChatUpdateMessageRequest
 import io.getstream.result.Result
@@ -538,7 +541,7 @@ constructor(
         channelType: String,
         channelId: String,
         cooldownTimeInSeconds: Int,
-    ): Call<Channel> = updateCooldown(
+    ): Call<Unit> = updateCooldown(
         channelType = channelType,
         channelId = channelId,
         cooldownTimeInSeconds = cooldownTimeInSeconds,
@@ -547,7 +550,7 @@ constructor(
     override fun disableSlowMode(
         channelType: String,
         channelId: String,
-    ): Call<Channel> = updateCooldown(
+    ): Call<Unit> = updateCooldown(
         channelType = channelType,
         channelId = channelId,
         cooldownTimeInSeconds = 0,
@@ -557,12 +560,12 @@ constructor(
         channelType: String,
         channelId: String,
         cooldownTimeInSeconds: Int,
-    ): Call<Channel> {
-        return channelApi.updateCooldown(
-            channelType = channelType,
-            channelId = channelId,
-            body = UpdateCooldownRequest.create(cooldownTimeInSeconds),
-        ).map(this::flattenChannel)
+    ): Call<Unit> {
+        return defaultApi.updateChannelPartial(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelPartialRequest(set = RawJson(mapOf("cooldown" to cooldownTimeInSeconds)) , unset = emptyList()),
+        ).toUnitCall()
     }
 
     override fun stopWatching(channelType: String, channelId: String): Call<Unit> = postponeCall {

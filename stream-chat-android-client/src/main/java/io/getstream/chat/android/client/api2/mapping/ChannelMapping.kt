@@ -23,6 +23,7 @@ import io.getstream.chat.android.client.api2.model.dto.DownstreamUserDto
 import io.getstream.chat.android.client.extensions.syncUnreadCountWithReads
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.User
+import io.getstream.openapi.models.StreamChatChannelResponse
 
 internal fun DownstreamChannelDto.toDomain(): Channel =
     Channel(

@@ -19,6 +19,7 @@ package io.getstream.chat.android.client.api2.mapping
 import io.getstream.chat.android.client.api2.model.dto.DownstreamMemberDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamMemberDto
 import io.getstream.chat.android.models.Member
+import io.getstream.openapi.models.StreamChatChannelMember
 
 internal fun DownstreamMemberDto.toDomain(): Member =
     Member(
@@ -32,6 +33,21 @@ internal fun DownstreamMemberDto.toDomain(): Member =
         banned = banned,
         channelRole = channel_role,
     )
+
+internal fun StreamChatChannelMember.toDomain(): Member =
+    Member(
+        //TODO: user shouldn't be nullable
+        user = user!!.toDomain(),
+        createdAt = created_at,
+        updatedAt = updated_at,
+        isInvited = invited,
+        inviteAcceptedAt = invite_accepted_at,
+        inviteRejectedAt = invite_rejected_at,
+        shadowBanned = shadow_banned,
+        banned = banned,
+        channelRole = channel_role,
+    )
+
 
 internal fun Member.toDto(): UpstreamMemberDto =
     UpstreamMemberDto(

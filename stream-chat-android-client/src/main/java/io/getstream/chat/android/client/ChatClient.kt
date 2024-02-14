@@ -2140,7 +2140,7 @@ internal constructor(
         channelType: String,
         channelId: String,
         cooldownTimeInSeconds: Int,
-    ): Call<Channel> {
+    ): Call<Unit> {
         return if (cooldownTimeInSeconds in 1..MAX_COOLDOWN_TIME_SECONDS) {
             api.enableSlowMode(channelType, channelId, cooldownTimeInSeconds)
         } else {
@@ -2165,7 +2165,7 @@ internal constructor(
     public fun disableSlowMode(
         channelType: String,
         channelId: String,
-    ): Call<Channel> {
+    ): Call<Unit> {
         return api.disableSlowMode(channelType, channelId)
     }
 
