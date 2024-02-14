@@ -44,7 +44,7 @@ public interface TypingEventListener {
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ): Result<Unit>
 
@@ -62,7 +62,7 @@ public interface TypingEventListener {
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     )
 
@@ -83,7 +83,7 @@ public interface TypingEventListener {
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     )
 }

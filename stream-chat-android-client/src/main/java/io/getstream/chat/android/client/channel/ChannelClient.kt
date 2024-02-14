@@ -793,9 +793,9 @@ public class ChannelClient internal constructor(
     @CheckResult
     public fun sendEvent(
         eventType: String,
-        extraData: Map<Any, Any> = emptyMap(),
+        parentId: String?,
     ): Call<ChatEvent> {
-        return client.sendEvent(eventType, channelType, channelId, extraData)
+        return client.sendEvent(eventType, channelType, channelId, parentId)
     }
 
     /**

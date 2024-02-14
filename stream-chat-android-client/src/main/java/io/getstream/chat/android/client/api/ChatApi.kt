@@ -406,7 +406,7 @@ internal interface ChatApi {
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
     ): Call<ChatEvent>
 
     @CheckResult

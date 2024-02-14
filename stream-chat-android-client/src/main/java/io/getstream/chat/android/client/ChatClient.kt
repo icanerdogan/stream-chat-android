@@ -2189,8 +2189,8 @@ internal constructor(
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any> = emptyMap(),
-    ): Call<ChatEvent> = api.sendEvent(eventType, channelType, channelId, extraData)
+        parentId: String?,
+    ): Call<ChatEvent> = api.sendEvent(eventType, channelType, channelId, parentId)
 
     @CheckResult
     public fun acceptInvite(
@@ -2806,31 +2806,28 @@ internal constructor(
      */
     @CheckResult
     public fun keystroke(channelType: String, channelId: String, parentId: String? = null): Call<ChatEvent> {
-        val extraData: Map<Any, Any> = parentId?.let {
-            mapOf(ARG_TYPING_PARENT_ID to parentId)
-        } ?: emptyMap()
         val eventTime = Date()
         val eventType = EventType.TYPING_START
         return api.sendEvent(
             eventType = eventType,
             channelType = channelType,
             channelId = channelId,
-            extraData = extraData,
+            parentId = parentId,
         )
             .doOnStart(userScope) {
                 plugins.forEach { plugin ->
                     logger.v { "[keystroke] #doOnStart; plugin: ${plugin::class.qualifiedName}" }
-                    plugin.onTypingEventRequest(eventType, channelType, channelId, extraData, eventTime)
+                    plugin.onTypingEventRequest(eventType, channelType, channelId, parentId, eventTime)
                 }
             }
             .doOnResult(userScope) { result ->
                 plugins.forEach { plugin ->
                     logger.v { "[keystroke] #doOnResult; plugin: ${plugin::class.qualifiedName}" }
-                    plugin.onTypingEventResult(result, eventType, channelType, channelId, extraData, eventTime)
+                    plugin.onTypingEventResult(result, eventType, channelType, channelId, parentId, eventTime)
                 }
             }
             .precondition(plugins) {
-                this.onTypingEventPrecondition(eventType, channelType, channelId, extraData, eventTime)
+                this.onTypingEventPrecondition(eventType, channelType, channelId, parentId, eventTime)
             }
             .share(userScope) { SendEventIdentifier(eventType, channelType, channelId, parentId) }
     }
@@ -2847,31 +2844,28 @@ internal constructor(
      */
     @CheckResult
     public fun stopTyping(channelType: String, channelId: String, parentId: String? = null): Call<ChatEvent> {
-        val extraData: Map<Any, Any> = parentId?.let {
-            mapOf(ARG_TYPING_PARENT_ID to parentId)
-        } ?: emptyMap()
         val eventTime = Date()
         val eventType = EventType.TYPING_STOP
         return api.sendEvent(
             eventType = eventType,
             channelType = channelType,
             channelId = channelId,
-            extraData = extraData,
+            parentId = parentId,
         )
             .doOnStart(userScope) {
                 plugins.forEach { plugin ->
                     logger.v { "[stopTyping] #doOnStart; plugin: ${plugin::class.qualifiedName}" }
-                    plugin.onTypingEventRequest(eventType, channelType, channelId, extraData, eventTime)
+                    plugin.onTypingEventRequest(eventType, channelType, channelId, parentId, eventTime)
                 }
             }
             .doOnResult(userScope) { result ->
                 plugins.forEach { plugin ->
                     logger.v { "[stopTyping] #doOnResult; plugin: ${plugin::class.qualifiedName}" }
-                    plugin.onTypingEventResult(result, eventType, channelType, channelId, extraData, eventTime)
+                    plugin.onTypingEventResult(result, eventType, channelType, channelId, parentId, eventTime)
                 }
             }
             .precondition(plugins) {
-                this.onTypingEventPrecondition(eventType, channelType, channelId, extraData, eventTime)
+                this.onTypingEventPrecondition(eventType, channelType, channelId, parentId, eventTime)
             }
             .share(userScope) { SendEventIdentifier(eventType, channelType, channelId, parentId) }
     }

@@ -52,7 +52,7 @@ internal class TypingEventListenerState(
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ): Result<Unit> {
         val channelState = state.mutableChannel(channelType, channelId)
@@ -132,7 +132,7 @@ internal class TypingEventListenerState(
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ) {
         val channelState = state.mutableChannel(channelType, channelId)
@@ -161,7 +161,7 @@ internal class TypingEventListenerState(
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ) {
         if (result is Result.Success) {
@@ -169,8 +169,7 @@ internal class TypingEventListenerState(
 
             when (eventType) {
                 EventType.TYPING_START ->
-                    channelState.keystrokeParentMessageId =
-                        extraData[ARG_TYPING_PARENT_ID] as? String
+                    channelState.keystrokeParentMessageId = parentId
                 EventType.TYPING_STOP -> channelState.keystrokeParentMessageId = null
             }
         }

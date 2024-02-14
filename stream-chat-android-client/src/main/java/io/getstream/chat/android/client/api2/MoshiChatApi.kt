@@ -112,6 +112,7 @@ import io.getstream.openapi.models.StreamChatChannelRequest
 import io.getstream.openapi.models.StreamChatChannelStopWatchingRequest
 import io.getstream.openapi.models.StreamChatCreateDeviceRequest
 import io.getstream.openapi.models.StreamChatDevice
+import io.getstream.openapi.models.StreamChatEventRequest
 import io.getstream.openapi.models.StreamChatFlagRequest
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
 import io.getstream.openapi.models.StreamChatGuestRequest
@@ -130,6 +131,7 @@ import io.getstream.openapi.models.StreamChatQueryMembersRequest
 import io.getstream.openapi.models.StreamChatQueryUsersRequest
 import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSearchRequest
+import io.getstream.openapi.models.StreamChatSendEventRequest
 import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.openapi.models.StreamChatSendReactionRequest
 import io.getstream.openapi.models.StreamChatShowChannelRequest
@@ -1097,16 +1099,20 @@ constructor(
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
     ): Call<ChatEvent> {
-        val map = mutableMapOf<Any, Any>("type" to eventType)
-        map.putAll(extraData)
-
-        return channelApi.sendEvent(
-            channelType = channelType,
-            channelId = channelId,
-            request = SendEventRequest(map),
-        ).map { response -> response.event.toDomain() }
+        return defaultApi.sendEvent(
+            type = channelType,
+            id = channelId,
+            request = StreamChatSendEventRequest(StreamChatEventRequest(
+                type = eventType,
+                parent_id = parentId)
+            ),
+        ).map {
+            // TODO:!!!
+            throw IllegalAccessError()
+            //response -> response.event.toDomain()
+        }
     }
 
     override fun getSyncHistory(channelIds: List<String>, lastSyncAt: String): Call<List<ChatEvent>> {

@@ -260,7 +260,7 @@ public interface Plugin :
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ): Result<Unit> = Result.Success(Unit)
 
@@ -268,7 +268,7 @@ public interface Plugin :
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ) {
         /* No-Op */
@@ -279,7 +279,7 @@ public interface Plugin :
         eventType: String,
         channelType: String,
         channelId: String,
-        extraData: Map<Any, Any>,
+        parentId: String?,
         eventTime: Date,
     ) {
         /* No-Op */
