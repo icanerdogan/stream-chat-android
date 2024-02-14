@@ -108,19 +108,26 @@ import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
 import io.getstream.openapi.models.StreamChatBanRequest
 import io.getstream.openapi.models.StreamChatChannelMember
+import io.getstream.openapi.models.StreamChatChannelRequest
+import io.getstream.openapi.models.StreamChatChannelStopWatchingRequest
 import io.getstream.openapi.models.StreamChatCreateDeviceRequest
 import io.getstream.openapi.models.StreamChatDevice
 import io.getstream.openapi.models.StreamChatFlagRequest
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
+import io.getstream.openapi.models.StreamChatHideChannelRequest
 import io.getstream.openapi.models.StreamChatMuteChannelRequest
 import io.getstream.openapi.models.StreamChatMuteUserRequest
 import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.openapi.models.StreamChatSendReactionRequest
+import io.getstream.openapi.models.StreamChatShowChannelRequest
+import io.getstream.openapi.models.StreamChatTruncateChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteUserRequest
 import io.getstream.openapi.models.StreamChatUpdateChannelPartialRequest
 import io.getstream.openapi.models.StreamChatUpdateChannelPartialResponse
+import io.getstream.openapi.models.StreamChatUpdateChannelRequest
+import io.getstream.openapi.models.StreamChatUpdateChannelResponse
 import io.getstream.openapi.models.StreamChatUpdateMessagePartialRequest
 import io.getstream.openapi.models.StreamChatUpdateMessageRequest
 import io.getstream.result.Result
@@ -569,11 +576,11 @@ constructor(
     }
 
     override fun stopWatching(channelType: String, channelId: String): Call<Unit> = postponeCall {
-        channelApi.stopWatching(
-            channelType = channelType,
-            channelId = channelId,
+        defaultApi.stopWatchingChannel(
+            type = channelType,
+            id = channelId,
             connectionId = connectionId,
-            body = emptyMap(),
+            request = StreamChatChannelStopWatchingRequest(),
         ).toUnitCall()
     }
 
@@ -584,6 +591,7 @@ constructor(
         sort: QuerySorter<Message>,
         pagination: PinnedMessagesPagination,
     ): Call<List<Message>> {
+        //TODO: missing API
         return channelApi.getPinnedMessages(
             channelType = channelType,
             channelId = channelId,
@@ -601,11 +609,17 @@ constructor(
         extraData: Map<String, Any>,
         updateMessage: Message?,
     ): Call<Channel> {
-        return channelApi.updateChannel(
-            channelType = channelType,
-            channelId = channelId,
-            body = UpdateChannelRequest(extraData, updateMessage?.toDtoOld()),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelRequest(
+                add_moderators = emptyList(),
+                demote_moderators = emptyList(),
+                remove_members = emptyList(),
+                data = StreamChatChannelRequest(Custom = RawJson(extraData)),
+                message = updateMessage?.toDto()
+            ),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun updateChannelPartial(
@@ -614,21 +628,21 @@ constructor(
         set: Map<String, Any>,
         unset: List<String>,
     ): Call<Channel> {
-        return channelApi.updateChannelPartial(
-            channelType = channelType,
-            channelId = channelId,
-            body = UpdateChannelPartialRequest(set, unset),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannelPartial(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelPartialRequest(set = RawJson(set), unset = unset),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun showChannel(
         channelType: String,
         channelId: String,
     ): Call<Unit> {
-        return channelApi.showChannel(
-            channelType = channelType,
-            channelId = channelId,
-            body = emptyMap(),
+        return defaultApi.showChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatShowChannelRequest(),
         ).toUnitCall()
     }
 
@@ -637,10 +651,10 @@ constructor(
         channelId: String,
         clearHistory: Boolean,
     ): Call<Unit> {
-        return channelApi.hideChannel(
-            channelType = channelType,
-            channelId = channelId,
-            body = HideChannelRequest(clearHistory),
+        return defaultApi.hideChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatHideChannelRequest(clear_history = clearHistory),
         ).toUnitCall()
     }
 
@@ -649,11 +663,11 @@ constructor(
         channelId: String,
         systemMessage: Message?,
     ): Call<Channel> {
-        return channelApi.truncateChannel(
-            channelType = channelType,
-            channelId = channelId,
-            body = TruncateChannelRequest(message = systemMessage?.toDtoOld()),
-        ).map(this::flattenChannel)
+        return defaultApi.truncateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatTruncateChannelRequest(message = systemMessage?.toDto()),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun rejectInvite(channelType: String, channelId: String): Call<Channel> {

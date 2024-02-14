@@ -24,6 +24,7 @@ import io.getstream.chat.android.client.extensions.syncUnreadCountWithReads
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.User
 import io.getstream.openapi.models.StreamChatChannelResponse
+import io.getstream.openapi.models.StreamChatUpdateChannelResponse
 
 internal fun DownstreamChannelDto.toDomain(): Channel =
     Channel(
@@ -50,4 +51,33 @@ internal fun DownstreamChannelDto.toDomain(): Channel =
         ownCapabilities = own_capabilities.toSet(),
         membership = membership?.toDomain(),
         extraData = extraData.toMutableMap(),
+    ).syncUnreadCountWithReads()
+
+internal fun StreamChatChannelResponse.toDomain(): Channel =
+    Channel(
+        id = id,
+        type = type,
+        //TODO:
+        //name = name ?: "",
+        //image = image ?: "",
+        //watcherCount = watcher_count,
+        frozen = frozen,
+        lastMessageAt = last_message_at,
+        createdAt = created_at,
+        deletedAt = deleted_at,
+        updatedAt = updated_at,
+        memberCount = member_count ?: 0,
+        //messages = messages.map(DownstreamMessageDto::toDomain),
+        //TODO: members shoudln't be nullable
+        members = members.orEmpty().map{ it -> it!!.toDomain()},
+        //watchers = watchers.map(DownstreamUserDto::toDomain),
+        //read = read.map { it.toDomain(last_message_at ?: it.last_read) },
+        config = config!!.toDomain(),
+        createdBy = created_by?.toDomain() ?: User(),
+        team = team!!,
+        cooldown = cooldown!!,
+        //pinnedMessages = pinned_messages.map(DownstreamMessageDto::toDomain),
+        ownCapabilities = own_capabilities.orEmpty().toSet(),
+        //membership = membership?.toDomain(),
+        extraData = custom.toMutableMap(),
     ).syncUnreadCountWithReads()

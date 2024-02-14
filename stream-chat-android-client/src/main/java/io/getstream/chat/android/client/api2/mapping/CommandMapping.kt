@@ -18,8 +18,18 @@ package io.getstream.chat.android.client.api2.mapping
 
 import io.getstream.chat.android.client.api2.model.dto.CommandDto
 import io.getstream.chat.android.models.Command
+import io.getstream.openapi.models.StreamChatCommand
 
 internal fun CommandDto.toDomain(): Command {
+    return Command(
+        name = name,
+        description = description,
+        args = args,
+        set = set,
+    )
+}
+
+internal fun StreamChatCommand.toDomain(): Command {
     return Command(
         name = name,
         description = description,

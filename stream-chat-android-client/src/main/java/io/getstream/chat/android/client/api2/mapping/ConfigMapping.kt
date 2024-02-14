@@ -19,6 +19,7 @@ package io.getstream.chat.android.client.api2.mapping
 import io.getstream.chat.android.client.api2.model.dto.CommandDto
 import io.getstream.chat.android.client.api2.model.dto.ConfigDto
 import io.getstream.chat.android.models.Config
+import io.getstream.openapi.models.StreamChatChannelConfigWithInfo
 
 internal fun ConfigDto.toDomain(): Config =
     Config(
@@ -43,3 +44,28 @@ internal fun ConfigDto.toDomain(): Config =
         blocklistBehavior = blocklist_behavior ?: "",
         commands = commands.map(CommandDto::toDomain),
     )
+
+internal fun StreamChatChannelConfigWithInfo.toDomain(): Config =
+    Config(
+        createdAt = created_at,
+        updatedAt = updated_at,
+        name = name ?: "",
+        typingEventsEnabled = typing_events,
+        readEventsEnabled = read_events,
+        connectEventsEnabled = connect_events,
+        searchEnabled = search,
+        isReactionsEnabled = reactions,
+        isThreadEnabled = replies,
+        muteEnabled = mutes,
+        uploadsEnabled = uploads,
+        urlEnrichmentEnabled = url_enrichment,
+        customEventsEnabled = custom_events,
+        pushNotificationsEnabled = push_notifications,
+        messageRetention = message_retention,
+        maxMessageLength = max_message_length,
+        automod = automod,
+        automodBehavior = automod_behavior,
+        blocklistBehavior = blocklist_behavior ?: "",
+        commands = commands.map { it -> it!!.toDomain() },
+    )
+
