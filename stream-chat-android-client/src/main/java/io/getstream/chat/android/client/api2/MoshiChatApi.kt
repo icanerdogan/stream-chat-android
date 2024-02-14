@@ -119,6 +119,8 @@ import io.getstream.openapi.models.StreamChatHideChannelRequest
 import io.getstream.openapi.models.StreamChatMarkChannelsReadRequest
 import io.getstream.openapi.models.StreamChatMarkReadRequest
 import io.getstream.openapi.models.StreamChatMarkUnreadRequest
+import io.getstream.openapi.models.StreamChatMessage
+import io.getstream.openapi.models.StreamChatMessageActionRequest
 import io.getstream.openapi.models.StreamChatMessageRequest
 import io.getstream.openapi.models.StreamChatMuteChannelRequest
 import io.getstream.openapi.models.StreamChatMuteUserRequest
@@ -811,30 +813,48 @@ constructor(
     }
 
     override fun getReplies(messageId: String, limit: Int): Call<List<Message>> {
-        return messageApi.getReplies(
-            messageId = messageId,
-            limit = limit,
-        ).map { response -> response.messages.map(DownstreamMessageDto::toDomain) }
+        return defaultApi.getReplies(
+            parentId = messageId,
+            //TODO: missing limit
+            //limit = limit,
+            createdAtAfter = null,
+            idLt = null,
+            idLte = null,
+            idAround = null,
+            idGt = null,
+            idGte = null,
+            createdAtAfterOrEqual = null,
+            createdAtAround = null,
+            createdAtBefore = null,
+            createdAtBeforeOrEqual = null
+        ).map { response -> response.messages.map(StreamChatMessage::toDomain) }
     }
 
     override fun getRepliesMore(messageId: String, firstId: String, limit: Int): Call<List<Message>> {
-        return messageApi.getRepliesMore(
-            messageId = messageId,
-            limit = limit,
-            firstId = firstId,
-        ).map { response -> response.messages.map(DownstreamMessageDto::toDomain) }
+        return defaultApi.getReplies(
+            parentId = messageId,
+            idLt = firstId,
+            //TODO: missing limit
+            //limit = limit,
+            createdAtAfter = null,
+            idLte = null,
+            idAround = null,
+            idGt = null,
+            idGte = null,
+            createdAtAfterOrEqual = null,
+            createdAtAround = null,
+            createdAtBefore = null,
+            createdAtBeforeOrEqual = null
+        ).map { response -> response.messages.map(StreamChatMessage::toDomain) }
     }
 
     override fun sendAction(request: DomainSendActionRequest): Call<Message> {
-        return messageApi.sendAction(
-            messageId = request.messageId,
-            request = SendActionRequest(
-                channel_id = request.channelId,
-                message_id = request.messageId,
-                type = request.type,
+        return defaultApi.runMessageAction(
+            id = request.messageId,
+            request = StreamChatMessageActionRequest(
                 form_data = request.formData,
             ),
-        ).map { response -> response.message.toDomain() }
+        ).map { response -> response.message!!.toDomain() }
     }
 
     override fun updateUsers(users: List<User>): Call<List<User>> {
