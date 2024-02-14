@@ -115,6 +115,10 @@ import io.getstream.openapi.models.StreamChatDevice
 import io.getstream.openapi.models.StreamChatFlagRequest
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
 import io.getstream.openapi.models.StreamChatHideChannelRequest
+import io.getstream.openapi.models.StreamChatMarkChannelsReadRequest
+import io.getstream.openapi.models.StreamChatMarkReadRequest
+import io.getstream.openapi.models.StreamChatMarkUnreadRequest
+import io.getstream.openapi.models.StreamChatMessageRequest
 import io.getstream.openapi.models.StreamChatMuteChannelRequest
 import io.getstream.openapi.models.StreamChatMuteUserRequest
 import io.getstream.openapi.models.StreamChatReaction
@@ -688,38 +692,45 @@ constructor(
         channelId: String,
         message: String?,
     ): Call<Channel> {
-        return channelApi.acceptInvite(
-            channelType = channelType,
-            channelId = channelId,
-            body = AcceptInviteRequest.create(userId = userId, message = message),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelRequest(
+                accept_invite = true,
+                add_moderators = emptyList(),
+                demote_moderators = emptyList(),
+                remove_members = emptyList(),
+                message = StreamChatMessageRequest(text = message, attachments = emptyList())
+            ),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun deleteChannel(channelType: String, channelId: String): Call<Channel> {
-        return channelApi.deleteChannel(
-            channelType = channelType,
-            channelId = channelId,
-        ).map(this::flattenChannel)
+        return defaultApi.deleteChannel(
+            type = channelType,
+            id = channelId,
+            hardDelete = false
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun markRead(channelType: String, channelId: String, messageId: String): Call<Unit> {
-        return channelApi.markRead(
-            channelType = channelType,
-            channelId = channelId,
-            request = MarkReadRequest(messageId),
+        return defaultApi.markRead(
+            type = channelType,
+            id = channelId,
+            request = StreamChatMarkReadRequest(message_id = messageId),
         ).toUnitCall()
     }
 
     override fun markUnread(channelType: String, channelId: String, messageId: String): Call<Unit> {
-        return channelApi.markUnread(
-            channelType = channelType,
-            channelId = channelId,
-            request = MarkUnreadRequest(messageId),
+        return defaultApi.markUnread(
+            type = channelType,
+            id = channelId,
+            request = StreamChatMarkUnreadRequest(message_id = messageId),
         ).toUnitCall()
     }
 
     override fun markAllRead(): Call<Unit> {
-        return channelApi.markAllRead().toUnitCall()
+        return defaultApi.markChannelsRead(StreamChatMarkChannelsReadRequest()).toUnitCall()
     }
 
     override fun addMembers(
