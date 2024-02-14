@@ -115,6 +115,7 @@ import io.getstream.openapi.models.StreamChatCreateDeviceRequest
 import io.getstream.openapi.models.StreamChatDevice
 import io.getstream.openapi.models.StreamChatFlagRequest
 import io.getstream.openapi.models.StreamChatGetApplicationResponse
+import io.getstream.openapi.models.StreamChatGuestRequest
 import io.getstream.openapi.models.StreamChatHideChannelRequest
 import io.getstream.openapi.models.StreamChatMarkChannelsReadRequest
 import io.getstream.openapi.models.StreamChatMarkReadRequest
@@ -128,6 +129,7 @@ import io.getstream.openapi.models.StreamChatReaction
 import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.openapi.models.StreamChatSendReactionRequest
 import io.getstream.openapi.models.StreamChatShowChannelRequest
+import io.getstream.openapi.models.StreamChatTranslateMessageRequest
 import io.getstream.openapi.models.StreamChatTruncateChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteUserRequest
@@ -137,6 +139,10 @@ import io.getstream.openapi.models.StreamChatUpdateChannelRequest
 import io.getstream.openapi.models.StreamChatUpdateChannelResponse
 import io.getstream.openapi.models.StreamChatUpdateMessagePartialRequest
 import io.getstream.openapi.models.StreamChatUpdateMessageRequest
+import io.getstream.openapi.models.StreamChatUpdateUserPartialRequest
+import io.getstream.openapi.models.StreamChatUpdateUsersRequest
+import io.getstream.openapi.models.StreamChatUserObject
+import io.getstream.openapi.models.StreamChatUserObjectRequest
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import io.getstream.result.call.CoroutineCall
@@ -858,20 +864,20 @@ constructor(
     }
 
     override fun updateUsers(users: List<User>): Call<List<User>> {
-        val map: Map<String, UpstreamUserDto> = users.associateBy({ it.id }, User::toDtoOld)
-        return userApi.updateUsers(
-            connectionId = connectionId,
-            body = UpdateUsersRequest(map),
+        val map: Map<String, StreamChatUserObjectRequest> = users.associateBy({ it.id }, User::toDto)
+        return defaultApi.updateUsers(
+            request = StreamChatUpdateUsersRequest(map),
         ).map { response ->
-            response.users.values.map(DownstreamUserDto::toDomain)
+            response.users.values.map(StreamChatUserObject::toDomain)
         }
     }
 
     override fun partialUpdateUser(id: String, set: Map<String, Any>, unset: List<String>): Call<User> {
-        return userApi.partialUpdateUsers(
-            connectionId = connectionId,
-            body = PartialUpdateUsersRequest(
-                listOf(PartialUpdateUserDto(id = id, set = set, unset = unset)),
+        return defaultApi.updateUsersPartial(
+            request = StreamChatUpdateUserPartialRequest(
+                id = userId,
+                set = RawJson(set),
+                unset = unset,
             ),
         ).map { response ->
             response.users[id]!!.toDomain()
@@ -879,16 +885,17 @@ constructor(
     }
 
     override fun getGuestUser(userId: String, userName: String): Call<GuestUser> {
-        return guestApi.getGuestUser(
-            body = GuestUserRequest.create(userId, userName),
-        ).map { response -> GuestUser(response.user.toDomain(), response.access_token) }
+        return defaultApi.createGuest(
+            request = StreamChatGuestRequest(user = StreamChatUserObjectRequest(id = userId,
+                custom = RawJson(mapOf("name" to userName)))),
+        ).map { response -> GuestUser(response.user!!.toDomain(), response.access_token) }
     }
 
     override fun translate(messageId: String, language: String): Call<Message> {
-        return messageApi.translate(
-            messageId = messageId,
-            request = TranslateMessageRequest(language),
-        ).map { response -> response.message.toDomain() }
+        return defaultApi.translateMessage(
+            id = messageId,
+            request = StreamChatTranslateMessageRequest(language = language),
+        ).map { response -> response.message!!.toDomain() }
     }
 
     override fun searchMessages(request: SearchMessagesRequest): Call<List<Message>> {
