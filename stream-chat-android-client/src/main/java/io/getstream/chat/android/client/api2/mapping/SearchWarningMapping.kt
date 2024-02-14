@@ -18,11 +18,21 @@ package io.getstream.chat.android.client.api2.mapping
 
 import io.getstream.chat.android.client.api2.model.dto.SearchWarningDto
 import io.getstream.chat.android.models.SearchWarning
+import io.getstream.openapi.models.StreamChatSearchWarning
 
 internal fun SearchWarningDto.toDomain(): SearchWarning {
     return SearchWarning(
         channelSearchCids = channel_search_cids,
         channelSearchCount = channel_search_count,
+        warningCode = warning_code,
+        warningDescription = warning_description,
+    )
+}
+
+internal fun StreamChatSearchWarning.toDomain(): SearchWarning {
+    return SearchWarning(
+        channelSearchCids = channel_search_cids.orEmpty(),
+        channelSearchCount = channel_search_count ?: 0,
         warningCode = warning_code,
         warningDescription = warning_description,
     )

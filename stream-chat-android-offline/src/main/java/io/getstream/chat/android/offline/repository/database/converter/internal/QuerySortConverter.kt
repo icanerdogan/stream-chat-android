@@ -66,6 +66,6 @@ internal class QuerySortConverter {
      */
     @TypeConverter
     fun objectToString(querySort: QuerySorter<Channel>): String? {
-        return adapter.toJson(querySort.toDto())
+        return adapter.toJson(querySort.toDtoOld())
     }
 }

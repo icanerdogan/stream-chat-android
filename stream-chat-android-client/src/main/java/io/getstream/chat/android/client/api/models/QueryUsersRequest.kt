@@ -20,6 +20,7 @@ import io.getstream.chat.android.models.FilterObject
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.chat.android.models.querysort.QuerySorter
+import io.getstream.chat.android.models.querysort.SortParam
 
 public data class QueryUsersRequest @JvmOverloads constructor(
     var filter: FilterObject,
@@ -28,5 +29,5 @@ public data class QueryUsersRequest @JvmOverloads constructor(
     var querySort: QuerySorter<User> = QuerySortByField(),
     var presence: Boolean = false,
 ) {
-    val sort: List<Map<String, Any>> = querySort.toDto()
+    val sort: List<SortParam> = querySort.toDto()
 }

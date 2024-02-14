@@ -47,17 +47,3 @@ internal fun StreamChatChannelMember.toDomain(): Member =
         banned = banned,
         channelRole = channel_role,
     )
-
-
-internal fun Member.toDto(): UpstreamMemberDto =
-    UpstreamMemberDto(
-        user = user.toDtoOld(),
-        created_at = createdAt,
-        updated_at = updatedAt,
-        invited = isInvited,
-        invite_accepted_at = inviteAcceptedAt,
-        invite_rejected_at = inviteRejectedAt,
-        shadow_banned = shadowBanned,
-        banned = banned,
-        channel_role = channelRole,
-    )

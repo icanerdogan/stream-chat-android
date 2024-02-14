@@ -34,7 +34,9 @@ public interface QuerySorter<T : Any> {
      */
     public val comparator: Comparator<in T>
 
-    public fun toDto(): List<Map<String, Any>>
+    public fun toDto(): List<SortParam>
+
+    public fun toDtoOld(): List<Map<String, Any>>
 
     public companion object {
         public const val KEY_DIRECTION: String = "direction"

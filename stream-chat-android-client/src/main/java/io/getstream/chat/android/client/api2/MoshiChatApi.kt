@@ -33,7 +33,6 @@ import io.getstream.chat.android.client.api2.endpoint.UserApi
 import io.getstream.chat.android.client.api2.endpoint.VideoCallApi
 import io.getstream.chat.android.client.api2.mapping.toDomain
 import io.getstream.chat.android.client.api2.mapping.toDto
-import io.getstream.chat.android.client.api2.mapping.toDtoOld
 import io.getstream.chat.android.client.api2.model.dto.ChatEventDto
 import io.getstream.chat.android.client.api2.model.dto.DeviceDto
 import io.getstream.chat.android.client.api2.model.dto.DownstreamMemberDto
@@ -125,10 +124,17 @@ import io.getstream.openapi.models.StreamChatMessageActionRequest
 import io.getstream.openapi.models.StreamChatMessageRequest
 import io.getstream.openapi.models.StreamChatMuteChannelRequest
 import io.getstream.openapi.models.StreamChatMuteUserRequest
+import io.getstream.openapi.models.StreamChatQueryBannedUsersRequest
+import io.getstream.openapi.models.StreamChatQueryChannelsRequest
+import io.getstream.openapi.models.StreamChatQueryMembersRequest
+import io.getstream.openapi.models.StreamChatQueryUsersRequest
 import io.getstream.openapi.models.StreamChatReaction
+import io.getstream.openapi.models.StreamChatSearchRequest
 import io.getstream.openapi.models.StreamChatSendMessageRequest
 import io.getstream.openapi.models.StreamChatSendReactionRequest
 import io.getstream.openapi.models.StreamChatShowChannelRequest
+import io.getstream.openapi.models.StreamChatSortParam
+import io.getstream.openapi.models.StreamChatSortParamRequest
 import io.getstream.openapi.models.StreamChatTranslateMessageRequest
 import io.getstream.openapi.models.StreamChatTruncateChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteChannelRequest
@@ -143,6 +149,7 @@ import io.getstream.openapi.models.StreamChatUpdateUserPartialRequest
 import io.getstream.openapi.models.StreamChatUpdateUsersRequest
 import io.getstream.openapi.models.StreamChatUserObject
 import io.getstream.openapi.models.StreamChatUserObjectRequest
+import io.getstream.openapi.models.StreamChatUserResponse
 import io.getstream.result.Result
 import io.getstream.result.call.Call
 import io.getstream.result.call.CoroutineCall
@@ -543,10 +550,10 @@ constructor(
         createdAtBefore: Date?,
         createdAtBeforeOrEqual: Date?,
     ): Call<List<BannedUser>> {
-        return moderationApi.queryBannedUsers(
-            payload = QueryBannedUsersRequest(
-                filter_conditions = filter.toMap(),
-                sort = sort.toDto(),
+        return defaultApi.queryBannedUsers(
+            payload = StreamChatQueryBannedUsersRequest(
+                filter_conditions = RawJson(filter.toMap()),
+                sort = sort.toDto().map { StreamChatSortParam(direction = it.direction, field = it.field) },
                 offset = offset,
                 limit = limit,
                 created_at_after = createdAtAfter,
@@ -554,7 +561,7 @@ constructor(
                 created_at_before = createdAtBefore,
                 created_at_before_or_equal = createdAtBeforeOrEqual,
             ),
-        ).map { response -> response.bans.map(BannedUserResponse::toDomain) }
+        ).map { response -> response.bans.map{ it!!.toDomain()} }
     }
 
     override fun enableSlowMode(
@@ -899,18 +906,19 @@ constructor(
     }
 
     override fun searchMessages(request: SearchMessagesRequest): Call<List<Message>> {
-        val newRequest = io.getstream.chat.android.client.api2.model.requests.SearchMessagesRequest(
-            filter_conditions = request.channelFilter.toMap(),
-            message_filter_conditions = request.messageFilter.toMap(),
+        val newRequest = StreamChatSearchRequest(
+            filter_conditions = RawJson(request.channelFilter.toMap()),
+            message_filter_conditions = RawJson(request.messageFilter.toMap()),
             offset = request.offset,
             limit = request.limit,
             next = request.next,
-            sort = request.sort,
+            sort = request.sort.orEmpty().map { StreamChatSortParam(direction = it.direction, field = it.field) },
         )
-        return generalApi.searchMessages(newRequest)
+        return defaultApi.search(newRequest)
             .map { response ->
                 response.results.map { resp ->
-                    resp.message.toDomain()
+                    //TODO: not nullable
+                    resp!!.message!!.toDomain()
                         .let { message ->
                             (message.cid.takeUnless(CharSequence::isBlank) ?: message.channelInfo?.cid)
                                 ?.let(message::enrichWithCid)
@@ -928,20 +936,21 @@ constructor(
         next: String?,
         sort: QuerySorter<Message>?,
     ): Call<SearchMessagesResult> {
-        val newRequest = io.getstream.chat.android.client.api2.model.requests.SearchMessagesRequest(
-            filter_conditions = channelFilter.toMap(),
-            message_filter_conditions = messageFilter.toMap(),
+        val newRequest = StreamChatSearchRequest(
+            filter_conditions = RawJson(channelFilter.toMap()),
+            message_filter_conditions = RawJson(messageFilter.toMap()),
             offset = offset,
             limit = limit,
             next = next,
-            sort = sort?.toDto(),
+            sort = sort?.toDto()?.map { StreamChatSortParam(direction = it.direction, field = it.field) },
         )
-        return generalApi.searchMessages(newRequest)
+        return defaultApi.search(newRequest)
             .map { response ->
                 val results = response.results
 
                 val messages = results.map { resp ->
-                    resp.message.toDomain().let { message ->
+                    //TODO: shouldn't be null
+                    resp!!.message!!.toDomain().let { message ->
                         (message.cid.takeUnless(CharSequence::isBlank) ?: message.channelInfo?.cid)
                             ?.let(message::enrichWithCid)
                             ?: message
@@ -951,17 +960,17 @@ constructor(
                     messages = messages,
                     next = response.next,
                     previous = response.previous,
-                    resultsWarning = response.resultsWarning?.toDomain(),
+                    resultsWarning = response.results_warning?.toDomain(),
                 )
             }
     }
 
     override fun queryChannels(query: QueryChannelsRequest): Call<List<Channel>> {
-        val request = io.getstream.chat.android.client.api2.model.requests.QueryChannelsRequest(
-            filter_conditions = query.filter.toMap(),
+        val request = StreamChatQueryChannelsRequest(
+            filter_conditions = RawJson(query.filter.toMap()),
             offset = query.offset,
             limit = query.limit,
-            sort = query.sort,
+            sort = query.sort.map { StreamChatSortParamRequest(direction = it.direction, field = it.field) },
             message_limit = query.messageLimit,
             member_limit = query.memberLimit,
             state = query.state,
@@ -970,10 +979,10 @@ constructor(
         )
 
         val lazyQueryChannelsCall = {
-            channelApi.queryChannels(
+            defaultApi.queryChannels(
                 connectionId = connectionId,
                 request = request,
-            ).map { response -> response.channels.map(this::flattenChannel) }
+            ).map { response -> response.channels.map{ it.channel!!.toDomain() } }
         }
 
         val isConnectionRequired = query.watch || query.presence
@@ -1023,18 +1032,17 @@ constructor(
     }
 
     override fun queryUsers(queryUsers: QueryUsersRequest): Call<List<User>> {
-        val request = io.getstream.chat.android.client.api2.model.requests.QueryUsersRequest(
-            filter_conditions = queryUsers.filter.toMap(),
+        val request = StreamChatQueryUsersRequest(
+            filter_conditions = RawJson(queryUsers.filter.toMap()),
             offset = queryUsers.offset,
             limit = queryUsers.limit,
-            sort = queryUsers.sort,
+            sort = queryUsers.sort.map { StreamChatSortParam(direction = it.direction, field = it.field) },
             presence = queryUsers.presence,
         )
         val lazyQueryUsersCall = {
-            userApi.queryUsers(
-                connectionId,
+            defaultApi.queryUsers(
                 request,
-            ).map { response -> response.users.map(DownstreamUserDto::toDomain) }
+            ).map { response -> response.users.map {it!!.toDomain()} }
         }
 
         return if (connectionId.isBlank() && queryUsers.presence) {
@@ -1053,18 +1061,19 @@ constructor(
         sort: QuerySorter<Member>,
         members: List<Member>,
     ): Call<List<Member>> {
-        val request = io.getstream.chat.android.client.api2.model.requests.QueryMembersRequest(
+        val request = StreamChatQueryMembersRequest(
             type = channelType,
             id = channelId,
-            filter_conditions = filter.toMap(),
+            filter_conditions = RawJson(filter.toMap()),
             offset = offset,
             limit = limit,
-            sort = sort.toDto(),
-            members = members.map(Member::toDto),
+            sort = sort.toDto().map { StreamChatSortParam(direction = it.direction, field = it.field) },
+            //TODO: this is probably not needed? iOS was never sending this
+            // members = members.map { it.toDto() },
         )
 
-        return generalApi.queryMembers(request)
-            .map { response -> response.members.map(DownstreamMemberDto::toDomain) }
+        return defaultApi.queryMembers(request)
+            .map { response -> response.members.map{ it!!.toDomain()} }
     }
 
     override fun createVideoCall(

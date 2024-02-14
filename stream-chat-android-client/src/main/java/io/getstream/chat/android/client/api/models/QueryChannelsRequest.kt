@@ -20,6 +20,7 @@ import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.FilterObject
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.chat.android.models.querysort.QuerySorter
+import io.getstream.chat.android.models.querysort.SortParam
 
 /**
  * Request body class for querying channels.
@@ -47,7 +48,7 @@ public data class QueryChannelsRequest(
     /**
      * List of sort specifications.
      */
-    public val sort: List<Map<String, Any>> = querySort.toDto()
+    public val sort: List<SortParam> = querySort.toDto()
 
     /**
      * Sets the limit of number of messages to be returned by this backend.

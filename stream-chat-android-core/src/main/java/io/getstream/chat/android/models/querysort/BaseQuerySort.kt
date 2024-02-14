@@ -60,7 +60,14 @@ public abstract class BaseQuerySort<T : Any> : QuerySorter<T> {
         sortDirection: SortDirection,
     ): Comparator<T>
 
-    public override fun toDto(): List<Map<String, Any>> = sortSpecifications.map { sortSpec ->
+    public override fun toDto(): List<SortParam> = sortSpecifications.map { sortSpec ->
+        SortParam(
+            field = sortSpec.sortAttribute.name,
+            direction = sortSpec.sortDirection.value,
+        )
+    }
+
+    public override fun toDtoOld(): List<Map<String, Any>> = sortSpecifications.map { sortSpec ->
         listOf(
             QuerySorter.KEY_FIELD_NAME to sortSpec.sortAttribute.name,
             QuerySorter.KEY_DIRECTION to sortSpec.sortDirection.value,
@@ -82,3 +89,8 @@ public abstract class BaseQuerySort<T : Any> : QuerySorter<T> {
         return true
     }
 }
+
+public data class SortParam(
+    public val direction: Int? = null,
+    public val field: String? = null,
+)
