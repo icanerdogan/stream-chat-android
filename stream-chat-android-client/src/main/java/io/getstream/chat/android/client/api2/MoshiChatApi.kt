@@ -108,6 +108,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.openapi.models.DefaultApi
 import io.getstream.openapi.models.StreamChatBanRequest
 import io.getstream.openapi.models.StreamChatChannelMember
+import io.getstream.openapi.models.StreamChatChannelMemberRequest
 import io.getstream.openapi.models.StreamChatChannelRequest
 import io.getstream.openapi.models.StreamChatChannelStopWatchingRequest
 import io.getstream.openapi.models.StreamChatCreateDeviceRequest
@@ -741,11 +742,18 @@ constructor(
         hideHistory: Boolean?,
         skipPush: Boolean?,
     ): Call<Channel> {
-        return channelApi.addMembers(
-            channelType = channelType,
-            channelId = channelId,
-            body = AddMembersRequest(members, systemMessage?.toDtoOld(), hideHistory, skipPush),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelRequest(
+                add_moderators = emptyList(),
+                demote_moderators = emptyList(),
+                remove_members = emptyList(),
+                add_members = members.map { StreamChatChannelMemberRequest(user_id = it) },
+                hide_history = hideHistory,
+                message = systemMessage?.toDto(),
+                skip_push = skipPush),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun removeMembers(
@@ -755,11 +763,16 @@ constructor(
         systemMessage: Message?,
         skipPush: Boolean?,
     ): Call<Channel> {
-        return channelApi.removeMembers(
-            channelType = channelType,
-            channelId = channelId,
-            body = RemoveMembersRequest(members, systemMessage?.toDtoOld(), skipPush),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelRequest(
+                add_moderators = emptyList(),
+                demote_moderators = emptyList(),
+                remove_members = members,
+                message = systemMessage?.toDto(),
+                skip_push = skipPush),
+        ).map{ it.channel!!.toDomain() }
     }
 
     override fun inviteMembers(
@@ -769,11 +782,17 @@ constructor(
         systemMessage: Message?,
         skipPush: Boolean?,
     ): Call<Channel> {
-        return channelApi.inviteMembers(
-            channelType = channelType,
-            channelId = channelId,
-            body = InviteMembersRequest(members, systemMessage?.toDtoOld(), skipPush),
-        ).map(this::flattenChannel)
+        return defaultApi.updateChannel(
+            type = channelType,
+            id = channelId,
+            request = StreamChatUpdateChannelRequest(
+                add_moderators = emptyList(),
+                demote_moderators = emptyList(),
+                remove_members = emptyList(),
+                invites = members.map { StreamChatChannelMemberRequest(user_id = it) },
+                message = systemMessage?.toDto(),
+                skip_push = skipPush),
+        ).map{ it.channel!!.toDomain() }
     }
 
     private fun flattenChannel(response: ChannelResponse): Channel {
