@@ -81,6 +81,7 @@ import io.getstream.chat.android.client.extensions.syncUnreadCountWithReads
 import io.getstream.chat.android.client.helpers.CallPostponeHelper
 import io.getstream.chat.android.client.parser.toMap
 import io.getstream.chat.android.client.parser2.adapters.RawJson
+import io.getstream.chat.android.client.parser2.adapters.internal.StreamDateFormatter
 import io.getstream.chat.android.client.scope.UserScope
 import io.getstream.chat.android.client.uploader.FileUploader
 import io.getstream.chat.android.client.utils.ProgressCallback
@@ -137,6 +138,7 @@ import io.getstream.openapi.models.StreamChatSendReactionRequest
 import io.getstream.openapi.models.StreamChatShowChannelRequest
 import io.getstream.openapi.models.StreamChatSortParam
 import io.getstream.openapi.models.StreamChatSortParamRequest
+import io.getstream.openapi.models.StreamChatSyncRequest
 import io.getstream.openapi.models.StreamChatTranslateMessageRequest
 import io.getstream.openapi.models.StreamChatTruncateChannelRequest
 import io.getstream.openapi.models.StreamChatUnmuteChannelRequest
@@ -162,6 +164,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okhttp3.ResponseBody
 import java.io.File
+import java.time.LocalDate
 import java.util.Date
 import io.getstream.chat.android.client.api.models.SendActionRequest as DomainSendActionRequest
 
@@ -1116,10 +1119,20 @@ constructor(
     }
 
     override fun getSyncHistory(channelIds: List<String>, lastSyncAt: String): Call<List<ChatEvent>> {
-        return generalApi.getSyncHistory(
-            body = SyncHistoryRequest(channelIds, lastSyncAt),
+        // TODO: lastSyncAt should be Date?
+        val date =  StreamDateFormatter().parse(lastSyncAt) ?: Date()
+        return defaultApi.sync(
+            request = StreamChatSyncRequest(channel_cids = channelIds, last_sync_at = date),
             connectionId = connectionId,
-        ).map { response -> response.events.map(ChatEventDto::toDomain) }
+            // TODO: this wasn't set before
+            watch = null,
+            withInaccessibleCids = null
+        ).map { response -> response.events.map{
+            // TODO:!!!
+            throw IllegalAccessError()
+            //ChatEventDto::toDomain
+          }
+        }
     }
 
     override fun downloadFile(fileUrl: String): Call<ResponseBody> {
