@@ -24,10 +24,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.api.models.QueryChannelsRequest
+import io.getstream.chat.android.client.extensions.cidToTypeAndId
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.Message
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.chat.android.state.utils.Event
+import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import kotlinx.coroutines.launch
 
@@ -36,6 +38,8 @@ class GroupChatInfoMemberOptionsViewModel(
     private val memberId: String,
     private val chatClient: ChatClient = ChatClient.instance(),
 ) : ViewModel() {
+
+    private val logger by taggedLogger("Chat:GCIMOptionsVM")
 
     private val _events = MutableLiveData<Event<UiEvent>>()
     private val _state: MediatorLiveData<State> = MediatorLiveData()
@@ -71,8 +75,9 @@ class GroupChatInfoMemberOptionsViewModel(
 
     fun onAction(action: Action) {
         when (action) {
-            Action.MessageClicked -> handleMessageClicked()
+            is Action.MessageClicked -> handleMessageClicked()
             is Action.RemoveFromChannel -> removeFromChannel(action.username)
+            is Action.AssignRole -> handleAssignRole(action.userId, action.role)
         }
     }
 
@@ -97,11 +102,39 @@ class GroupChatInfoMemberOptionsViewModel(
         }
     }
 
+    private fun handleAssignRole(userId: String, role: String) {
+        logger.d { "[handleAssignRole] userId: $userId, role: $role" }
+        _events.value = Event(UiEvent.Dismiss)
+        val (type, id) = cid.cidToTypeAndId()
+        chatClient.updateChannel(
+            channelType = type,
+            channelId = id,
+            updateMessage = null,
+            channelExtraData = mapOf(
+                "assign_roles" to listOf(
+                    mapOf(
+                        "user_id" to userId,
+                        "channel_role" to role,
+                    ),
+                ),
+            ),
+        ).enqueue { result ->
+            if (result.isSuccess) {
+                val member = result.getOrNull()?.members?.firstOrNull { it.getUserId() == userId }
+                logger.v { "[handleAssignRole] completed: ${member?.channelRole}" }
+            } else {
+                logger.e { "[handleAssignRole] failed: ${result.errorOrNull()}" }
+            }
+        }
+    }
+
     data class State(val directChannelCid: String?, val loading: Boolean)
 
     sealed class Action {
-        object MessageClicked : Action()
+        data object MessageClicked : Action()
         data class RemoveFromChannel(val username: String) : Action()
+
+        data class AssignRole(val userId: String, val role: String) : Action()
     }
 
     sealed class UiEvent {

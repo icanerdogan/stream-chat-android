@@ -25,6 +25,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.extensions.cidToTypeAndId
 import io.getstream.chat.android.models.ChannelCapabilities
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.state.utils.EventObserver
@@ -38,8 +40,12 @@ import io.getstream.chat.ui.sample.feature.chat.info.group.GroupChatInfoFragment
 import io.getstream.chat.ui.sample.feature.chat.info.toUser
 import io.getstream.chat.ui.sample.feature.chat.info.toUserData
 import io.getstream.chat.ui.sample.feature.common.ConfirmationDialogFragment
+import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 
 class GroupChatInfoMemberOptionsDialogFragment : BottomSheetDialogFragment() {
+
+    private val logger by taggedLogger("Chat:GCIMOptionsDialog")
 
     private val cid: String by lazy {
         requireArguments().getString(ARG_CID)!!
@@ -94,30 +100,53 @@ class GroupChatInfoMemberOptionsDialogFragment : BottomSheetDialogFragment() {
                 viewModel.onAction(GroupChatInfoMemberOptionsViewModel.Action.MessageClicked)
             }
 
-            if (isAnonymousChannel(cid) || !ownCapabilities.contains(ChannelCapabilities.UPDATE_CHANNEL_MEMBERS)) {
-                optionRemove.isVisible = false
-            } else {
-                optionRemove.setOnClickListener {
-                    ConfirmationDialogFragment.newInstance(
-                        iconResId = R.drawable.ic_delete,
-                        iconTintResId = R.color.red,
-                        title = getString(R.string.chat_group_info_user_remove_title, user.name),
-                        description = getString(
-                            R.string.chat_group_info_user_remove_description,
-                            user.name,
-                            channelName,
-                        ),
-                        confirmText = getString(R.string.remove),
-                        cancelText = getString(R.string.cancel),
-                    ).apply {
-                        confirmClickListener = ConfirmationDialogFragment.ConfirmClickListener {
-                            viewModel.onAction(GroupChatInfoMemberOptionsViewModel.Action.RemoveFromChannel(user.name))
-                        }
-                    }.show(parentFragmentManager, ConfirmationDialogFragment.TAG)
-                }
+            grandAdmin.setOnOptionClickListener {
+                viewModel.onAction(
+                    GroupChatInfoMemberOptionsViewModel.Action.AssignRole(
+                        userId = user.id,
+                        role = "channel_moderator",
+                    )
+                )
+            }
+
+            revokeAdmin.setOnOptionClickListener {
+                viewModel.onAction(
+                    GroupChatInfoMemberOptionsViewModel.Action.AssignRole(
+                        userId = user.id,
+                        role = "channel_member",
+                    )
+                )
+            }
+            optionRemove.setOnClickListener {
+                ConfirmationDialogFragment.newInstance(
+                    iconResId = R.drawable.ic_delete,
+                    iconTintResId = R.color.red,
+                    title = getString(R.string.chat_group_info_user_remove_title, user.name),
+                    description = getString(
+                        R.string.chat_group_info_user_remove_description,
+                        user.name,
+                        channelName,
+                    ),
+                    confirmText = getString(R.string.remove),
+                    cancelText = getString(R.string.cancel),
+                ).apply {
+                    confirmClickListener = ConfirmationDialogFragment.ConfirmClickListener {
+                        viewModel.onAction(GroupChatInfoMemberOptionsViewModel.Action.RemoveFromChannel(user.name))
+                    }
+                }.show(parentFragmentManager, ConfirmationDialogFragment.TAG)
             }
             optionCancel.setOnOptionClickListener {
                 dismiss()
+            }
+
+            if (isAnonymousChannel(cid) || !ownCapabilities.contains(ChannelCapabilities.UPDATE_CHANNEL_MEMBERS)) {
+                grandAdmin.isVisible = false
+                revokeAdmin.isVisible = false
+                optionRemove.isVisible = false
+            } else {
+                grandAdmin.isVisible = true
+                revokeAdmin.isVisible = true
+                optionRemove.isVisible = true
             }
         }
     }

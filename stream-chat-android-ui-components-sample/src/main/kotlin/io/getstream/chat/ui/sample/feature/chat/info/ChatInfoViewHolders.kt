@@ -137,8 +137,14 @@ class ChatInfoGroupMemberViewHolder(
             binding.mutedIcon.isVisible = notificationsMuted == true
             binding.onlineTextView.text = user.getLastSeenText(itemView.context)
 
-            val isOwner = item.member.user.id == item.createdBy.id
-            binding.ownerTextView.isVisible = isOwner
+            binding.ownerTextView.isVisible = true
+            binding.ownerTextView.text = when (item.member.user.id == item.createdBy.id) {
+                true -> itemView.context.getString(R.string.chat_group_info_owner)
+                else -> when (val role = channelRole) {
+                    "channel_member" -> itemView.context.getString(R.string.chat_group_info_member)
+                    else -> role
+                }
+            }
         }
     }
 }
