@@ -91,3 +91,12 @@ internal data class DownstreamUserBlockDto(
     val blocked_user_id: String,
     val created_at: Date,
 )
+
+@JsonClass(generateAdapter = true)
+internal data class DownstreamUserBlocksDto(
+    val blocked_by_user_id: String,
+    val blocked_user_id: String,
+    val created_at: Date,
+    val blocked_user: DownstreamUserDto,
+    val user: DownstreamUserDto,
+)

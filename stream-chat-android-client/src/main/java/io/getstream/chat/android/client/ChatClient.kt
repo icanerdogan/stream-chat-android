@@ -151,6 +151,7 @@ import io.getstream.chat.android.models.BannedUsersSort
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.ConnectionData
 import io.getstream.chat.android.models.ConnectionState
+import io.getstream.chat.android.models.DetailedUserBlock
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.EventType
 import io.getstream.chat.android.models.FilterObject
@@ -2475,7 +2476,7 @@ internal constructor(
      * Return na list of blocked users.
      */
     @CheckResult
-    public fun queryBlockedUsers(): Call<List<UserBlock>> {
+    public fun queryBlockedUsers(): Call<List<DetailedUserBlock>> {
         return api.queryBlockedUsers()
     }
 

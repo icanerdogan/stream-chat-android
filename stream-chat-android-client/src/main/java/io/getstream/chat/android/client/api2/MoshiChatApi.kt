@@ -101,6 +101,7 @@ import io.getstream.chat.android.models.Attachment
 import io.getstream.chat.android.models.BannedUser
 import io.getstream.chat.android.models.BannedUsersSort
 import io.getstream.chat.android.models.Channel
+import io.getstream.chat.android.models.DetailedUserBlock
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.FilterObject
 import io.getstream.chat.android.models.Flag
@@ -829,7 +830,7 @@ constructor(
         }
     }
 
-    override fun queryBlockedUsers(): Call<List<UserBlock>> {
+    override fun queryBlockedUsers(): Call<List<DetailedUserBlock>> {
         return userApi.queryBlockedUsers().map {
             it.blocks.toDomain()
         }

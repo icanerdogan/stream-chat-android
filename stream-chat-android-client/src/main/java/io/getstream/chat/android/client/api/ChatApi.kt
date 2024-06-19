@@ -32,6 +32,7 @@ import io.getstream.chat.android.models.Attachment
 import io.getstream.chat.android.models.BannedUser
 import io.getstream.chat.android.models.BannedUsersSort
 import io.getstream.chat.android.models.Channel
+import io.getstream.chat.android.models.DetailedUserBlock
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.FilterObject
 import io.getstream.chat.android.models.Flag
@@ -223,7 +224,7 @@ internal interface ChatApi {
     fun unblockUser(userId: String): Call<UserBlock>
 
     @CheckResult
-    fun queryBlockedUsers(): Call<List<UserBlock>>
+    fun queryBlockedUsers(): Call<List<DetailedUserBlock>>
 
     @CheckResult
     fun partialUpdateUser(

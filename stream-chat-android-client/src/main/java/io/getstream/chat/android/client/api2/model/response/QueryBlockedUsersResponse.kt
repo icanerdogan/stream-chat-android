@@ -17,9 +17,9 @@
 package io.getstream.chat.android.client.api2.model.response
 
 import com.squareup.moshi.JsonClass
-import io.getstream.chat.android.client.api2.model.dto.DownstreamUserBlockDto
+import io.getstream.chat.android.client.api2.model.dto.DownstreamUserBlocksDto
 
 @JsonClass(generateAdapter = true)
 internal data class QueryBlockedUsersResponse(
-    val blocks: List<DownstreamUserBlockDto>,
+    val blocks: List<DownstreamUserBlocksDto>,
 )

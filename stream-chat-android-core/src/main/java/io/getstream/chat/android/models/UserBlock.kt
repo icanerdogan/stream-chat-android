@@ -30,3 +30,16 @@ public data class UserBlock(
     val userId: String,
     val blockedAt: Date,
 )
+
+/**
+ * Represents a user block with full user data.
+ *
+ * @param user who is the initiator of the block (usually will contain the ID of the current user)
+ * @param blockedUser the ID of the blocked user.
+ * @param blockedAt when the action happened
+ */
+public data class DetailedUserBlock(
+    val user: User,
+    val blockedUser: User,
+    val blockedAt: Date,
+)

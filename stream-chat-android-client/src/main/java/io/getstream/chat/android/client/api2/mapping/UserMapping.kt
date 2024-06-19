@@ -18,8 +18,10 @@ package io.getstream.chat.android.client.api2.mapping
 
 import io.getstream.chat.android.client.api2.model.dto.DeviceDto
 import io.getstream.chat.android.client.api2.model.dto.DownstreamUserBlockDto
+import io.getstream.chat.android.client.api2.model.dto.DownstreamUserBlocksDto
 import io.getstream.chat.android.client.api2.model.dto.DownstreamUserDto
 import io.getstream.chat.android.client.api2.model.dto.UpstreamUserDto
+import io.getstream.chat.android.models.DetailedUserBlock
 import io.getstream.chat.android.models.Device
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.models.UserBlock
@@ -63,10 +65,16 @@ internal fun DownstreamUserDto.toDomain(currentUserId: UserId?): User =
         extraData = extraData.toMutableMap(),
     )
 
+internal fun DownstreamUserBlocksDto.toDomain() = DetailedUserBlock(
+    user = user.toDomain(blocked_by_user_id),
+    blockedUser = user.toDomain(blocked_user_id),
+    blockedAt = created_at,
+)
+
+internal fun List<DownstreamUserBlocksDto>.toDomain(): List<DetailedUserBlock> = map { it.toDomain() }
+
 internal fun DownstreamUserBlockDto.toDomain(): UserBlock = UserBlock(
     blockedBy = blocked_by_user_id,
     userId = blocked_user_id,
     blockedAt = created_at,
 )
-
-internal fun List<DownstreamUserBlockDto>.toDomain(): List<UserBlock> = map { it.toDomain() }
