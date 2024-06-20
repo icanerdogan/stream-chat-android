@@ -58,6 +58,8 @@ internal object PreviewUserData {
         image = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128",
     )
 
+    val users = listOf(user1, user2, user3, user4, user5)
+
     /**
      * Users with specific properties.
      */
