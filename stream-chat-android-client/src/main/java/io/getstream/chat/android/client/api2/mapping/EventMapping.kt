@@ -732,7 +732,6 @@ private fun PollClosedEventDto.toDomain(currentUserId: UserId?): PollClosedEvent
         createdAt = created_at.date,
         rawCreatedAt = created_at.rawDate,
         cid = cid,
-        message = message.toDomain(currentUserId).enrichWithPoll(newPoll),
         poll = newPoll,
     )
 }
@@ -744,7 +743,6 @@ private fun PollDeletedEventDto.toDomain(currentUserId: UserId?): PollDeletedEve
         createdAt = created_at.date,
         rawCreatedAt = created_at.rawDate,
         cid = cid,
-        message = message.toDomain(currentUserId).enrichWithPoll(newPoll),
         poll = newPoll,
     )
 }
@@ -756,7 +754,6 @@ private fun PollUpdatedEventDto.toDomain(currentUserId: UserId?): PollUpdatedEve
         createdAt = created_at.date,
         rawCreatedAt = created_at.rawDate,
         cid = cid,
-        message = message.toDomain(currentUserId).enrichWithPoll(newPoll),
         poll = newPoll,
     )
 }
@@ -779,7 +776,6 @@ private fun VoteCastedEventDto.toDomain(currentUserId: UserId?): VoteCastedEvent
         rawCreatedAt = created_at.rawDate,
         cid = cid,
         poll = newPoll,
-        message = message.toDomain(currentUserId).enrichWithPoll(newPoll),
         newVote = pollVote,
     )
 }
@@ -802,10 +798,10 @@ private fun VoteChangedEventDto.toDomain(currentUserId: UserId?): VoteChangedEve
         rawCreatedAt = created_at.rawDate,
         cid = cid,
         poll = newPoll,
-        message = message.toDomain(currentUserId).enrichWithPoll(newPoll),
         newVote = pollVote,
     )
 }
+
 private fun VoteRemovedEventDto.toDomain(currentUserId: UserId?): VoteRemovedEvent {
     val removedVote = poll_vote.toDomain(currentUserId)
     val newPoll = poll.toDomain(currentUserId)
@@ -815,7 +811,6 @@ private fun VoteRemovedEventDto.toDomain(currentUserId: UserId?): VoteRemovedEve
         rawCreatedAt = created_at.rawDate,
         cid = cid,
         poll = newPoll,
-        message = message.toDomain(currentUserId).enrichWithPoll(newPoll),
         removedVote = removedVote,
     )
 }

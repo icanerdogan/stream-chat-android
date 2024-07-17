@@ -670,9 +670,8 @@ public data class PollUpdatedEvent(
     override val createdAt: Date,
     override val rawCreatedAt: String?,
     override val cid: String,
-    override val message: Message,
     val poll: Poll,
-) : CidEvent2(), HasMessage
+) : CidEvent2()
 
 /**
  * Triggered when a poll is deleted.
@@ -682,9 +681,8 @@ public data class PollDeletedEvent(
     override val createdAt: Date,
     override val rawCreatedAt: String?,
     override val cid: String,
-    override val message: Message,
     val poll: Poll,
-) : CidEvent2(), HasMessage
+) : CidEvent2()
 
 /**
  * Triggered when a poll is closed.
@@ -694,9 +692,8 @@ public data class PollClosedEvent(
     override val createdAt: Date,
     override val rawCreatedAt: String?,
     override val cid: String,
-    override val message: Message,
     val poll: Poll,
-) : CidEvent2(), HasMessage
+) : CidEvent2()
 
 /**
  * Triggered when a vote is casted.
@@ -706,10 +703,9 @@ public data class VoteCastedEvent(
     override val createdAt: Date,
     override val rawCreatedAt: String?,
     override val cid: String,
-    override val message: Message,
     val poll: Poll,
     val newVote: Vote,
-) : CidEvent2(), HasMessage
+) : CidEvent2()
 
 /**
  * Triggered when a vote is changed.
@@ -719,10 +715,9 @@ public data class VoteChangedEvent(
     override val createdAt: Date,
     override val rawCreatedAt: String?,
     override val cid: String,
-    override val message: Message,
     val poll: Poll,
     val newVote: Vote,
-) : CidEvent2(), HasMessage
+) : CidEvent2()
 
 /**
  * Triggered when a vote is removed.
@@ -732,10 +727,9 @@ public data class VoteRemovedEvent(
     override val createdAt: Date,
     override val rawCreatedAt: String?,
     override val cid: String,
-    override val message: Message,
     val poll: Poll,
     val removedVote: Vote,
-) : CidEvent2(), HasMessage
+) : CidEvent2()
 
 /**
  * Triggered when a user gets connected to the WS

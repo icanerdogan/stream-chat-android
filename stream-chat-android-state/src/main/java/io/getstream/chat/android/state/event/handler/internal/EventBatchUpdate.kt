@@ -16,6 +16,7 @@
 
 package io.getstream.chat.android.state.event.handler.internal
 
+import io.getstream.chat.android.client.extensions.cidToTypeAndId
 import io.getstream.chat.android.client.extensions.internal.updateLastMessage
 import io.getstream.chat.android.client.extensions.internal.updateUsers
 import io.getstream.chat.android.client.extensions.internal.users
@@ -23,6 +24,7 @@ import io.getstream.chat.android.client.persistance.repository.RepositoryFacade
 import io.getstream.chat.android.client.utils.message.latestOrNull
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.Message
+import io.getstream.chat.android.models.Poll
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.state.plugin.state.global.GlobalState
 import io.getstream.log.StreamLog
@@ -91,6 +93,17 @@ internal class EventBatchUpdate private constructor(
         // ensure we store all users for this channel
         addUsers(message.users())
         messageMap += (message.id to message)
+    }
+
+    fun addMessageWithLookUp(cid: String, poll: Poll, createdAt: Date) {
+        // ensure we store all users for this channel
+        val (type, id) = cid.cidToTypeAndId()
+        val message: Message = messageMap[id] ?: Message(id = id, poll = poll)
+        addMessageData(
+            receivedEventDate = createdAt,
+            cid = cid,
+            message = message,
+        )
     }
 
     fun addUsers(newUsers: List<User>) {

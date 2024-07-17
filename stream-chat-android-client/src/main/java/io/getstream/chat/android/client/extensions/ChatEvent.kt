@@ -46,11 +46,11 @@ public fun ChatEvent.enrichIfNeeded(): ChatEvent = when (this) {
     is ChannelTruncatedEvent -> copy(message = message?.enrichWithCid(cid))
     is ChannelUpdatedByUserEvent -> copy(message = message?.enrichWithCid(cid))
     is NotificationMessageNewEvent -> copy(message = message.enrichWithCid(cid))
-    is PollUpdatedEvent -> copy(message = message.enrichWithCid(cid))
-    is PollDeletedEvent -> copy(message = message.enrichWithCid(cid))
-    is PollClosedEvent -> copy(message = message.enrichWithCid(cid))
-    is VoteCastedEvent -> copy(message = message.enrichWithCid(cid))
-    is VoteChangedEvent -> copy(message = message.enrichWithCid(cid))
-    is VoteRemovedEvent -> copy(message = message.enrichWithCid(cid))
+    is PollUpdatedEvent -> copy(poll = poll)
+    is PollDeletedEvent -> copy(poll = poll)
+    is PollClosedEvent -> copy(poll = poll)
+    is VoteCastedEvent -> copy(poll = poll)
+    is VoteChangedEvent -> copy(poll = poll)
+    is VoteRemovedEvent -> copy(poll = poll)
     else -> this
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.chat.android.state.plugin.logic.channel.internal
 
+import android.util.Log
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.api.models.Pagination
 import io.getstream.chat.android.client.api.models.QueryChannelRequest
@@ -75,6 +76,7 @@ import io.getstream.chat.android.client.events.UserUpdatedEvent
 import io.getstream.chat.android.client.events.VoteCastedEvent
 import io.getstream.chat.android.client.events.VoteChangedEvent
 import io.getstream.chat.android.client.events.VoteRemovedEvent
+import io.getstream.chat.android.client.extensions.cidToTypeAndId
 import io.getstream.chat.android.client.extensions.getCreatedAtOrDefault
 import io.getstream.chat.android.client.extensions.getCreatedAtOrNull
 import io.getstream.chat.android.client.extensions.internal.NEVER
@@ -83,6 +85,7 @@ import io.getstream.chat.android.client.persistance.repository.RepositoryFacade
 import io.getstream.chat.android.client.query.pagination.AnyChannelPaginationRequest
 import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.Message
+import io.getstream.chat.android.models.Poll
 import io.getstream.chat.android.models.User
 import io.getstream.chat.android.state.event.handler.internal.utils.toChannelUserRead
 import io.getstream.chat.android.state.model.querychannels.pagination.internal.QueryChannelPaginationRequest
@@ -448,6 +451,7 @@ internal class ChannelLogic(
             Pagination.GREATER_THAN_OR_EQUAL,
             Pagination.GREATER_THAN,
             -> messages.last()
+
             Pagination.LESS_THAN,
             Pagination.LESS_THAN_OR_EQUAL,
             Pagination.AROUND_ID,
@@ -479,6 +483,16 @@ internal class ChannelLogic(
         val ownReactions = getMessage(message.id)?.ownReactions ?: message.ownReactions
         channelStateLogic.upsertMessage(message.copy(ownReactions = ownReactions))
         channelStateLogic.delsertPinnedMessage(message.copy(ownReactions = ownReactions))
+    }
+
+    private fun upsertEventMessage(cid: String, poll: Poll) {
+        Log.e("Test", "upsertEventMessage, poll: $poll")
+        val (type, id) = cid.cidToTypeAndId()
+        val message = getMessage(id)
+        val messagePoll = message?.poll
+        if (messagePoll?.id == poll.id) {
+            channelStateLogic.upsertMessage(message.copy(poll = poll))
+        }
     }
 
     /**
@@ -523,6 +537,7 @@ internal class ChannelLogic(
                 channelStateLogic.updateCurrentUserRead(event.createdAt, event.message)
                 channelStateLogic.takeUnless { event.message.shadowed }?.toggleHidden(false)
             }
+
             is MessageUpdatedEvent -> {
                 event.message.copy(
                     replyTo = event.message.replyMessageId
@@ -532,6 +547,7 @@ internal class ChannelLogic(
 
                 channelStateLogic.toggleHidden(false)
             }
+
             is MessageDeletedEvent -> {
                 if (event.hardDelete) {
                     deleteMessage(event.message)
@@ -540,6 +556,7 @@ internal class ChannelLogic(
                 }
                 channelStateLogic.toggleHidden(false)
             }
+
             is NotificationMessageNewEvent -> {
                 if (!mutableState.insideSearch.value) {
                     upsertEventMessage(event.message)
@@ -547,15 +564,19 @@ internal class ChannelLogic(
                 channelStateLogic.updateCurrentUserRead(event.createdAt, event.message)
                 channelStateLogic.toggleHidden(false)
             }
+
             is ReactionNewEvent -> {
                 upsertEventMessage(event.message)
             }
+
             is ReactionUpdateEvent -> {
                 upsertEventMessage(event.message)
             }
+
             is ReactionDeletedEvent -> {
                 upsertEventMessage(event.message)
             }
+
             is MemberRemovedEvent -> {
                 if (event.user.id == currentUserId) {
                     logger.i { "[handleEvent] skip MemberRemovedEvent for currentUser" }
@@ -563,85 +584,110 @@ internal class ChannelLogic(
                 }
                 channelStateLogic.deleteMember(event.member)
             }
+
             is NotificationRemovedFromChannelEvent -> {
                 channelStateLogic.setMembers(event.channel.members, event.channel.memberCount)
                 channelStateLogic.setWatchers(event.channel.watchers, event.channel.watcherCount)
             }
+
             is MemberAddedEvent -> {
                 channelStateLogic.addMember(event.member)
             }
+
             is MemberUpdatedEvent -> {
                 channelStateLogic.upsertMember(event.member)
                 channelStateLogic.updateMembership(event.member)
             }
+
             is NotificationAddedToChannelEvent -> {
                 channelStateLogic.upsertMembers(event.channel.members)
             }
+
             is UserPresenceChangedEvent -> {
                 upsertUserPresence(event.user)
             }
+
             is UserUpdatedEvent -> {
                 upsertUser(event.user)
             }
+
             is UserStartWatchingEvent -> {
                 channelStateLogic.upsertWatcher(event)
             }
+
             is UserStopWatchingEvent -> {
                 channelStateLogic.deleteWatcher(event)
             }
+
             is ChannelUpdatedEvent -> {
                 channelStateLogic.updateChannelData(event)
             }
+
             is ChannelUpdatedByUserEvent -> {
                 channelStateLogic.updateChannelData(event)
             }
+
             is ChannelHiddenEvent -> {
                 channelStateLogic.toggleHidden(true)
             }
+
             is ChannelVisibleEvent -> {
                 channelStateLogic.toggleHidden(false)
             }
+
             is ChannelDeletedEvent -> {
                 removeMessagesBefore(event.createdAt)
                 channelStateLogic.deleteChannel(event.createdAt)
             }
+
             is ChannelTruncatedEvent -> {
                 removeMessagesBefore(event.createdAt, event.message)
             }
+
             is NotificationChannelTruncatedEvent -> {
                 removeMessagesBefore(event.createdAt)
             }
+
             is TypingStopEvent -> {
                 channelStateLogic.setTyping(event.user.id, null)
             }
+
             is TypingStartEvent -> {
                 channelStateLogic.setTyping(event.user.id, event)
             }
+
             is MessageReadEvent -> {
                 channelStateLogic.updateRead(event.toChannelUserRead())
             }
+
             is NotificationMarkReadEvent -> {
                 channelStateLogic.updateRead(event.toChannelUserRead())
             }
+
             is MarkAllReadEvent -> {
                 channelStateLogic.updateRead(event.toChannelUserRead())
             }
+
             is NotificationMarkUnreadEvent -> {
                 channelStateLogic.updateRead(event.toChannelUserRead())
             }
+
             is NotificationInviteAcceptedEvent -> {
                 channelStateLogic.addMember(event.member)
                 channelStateLogic.updateChannelData(event)
             }
+
             is NotificationInviteRejectedEvent -> {
                 channelStateLogic.deleteMember(event.member)
                 channelStateLogic.updateChannelData(event)
             }
+
             is NotificationChannelMutesUpdatedEvent -> {
                 event.me.channelMutes.any { mute ->
                     mute.channel.cid == mutableState.cid
                 }.let(channelStateLogic::updateMute)
             }
+
             is ChannelUserBannedEvent -> {
                 channelStateLogic.updateMemberBanned(
                     memberUserId = event.user.id,
@@ -649,6 +695,7 @@ internal class ChannelLogic(
                     shadow = event.shadow,
                 )
             }
+
             is ChannelUserUnbannedEvent -> {
                 channelStateLogic.updateMemberBanned(
                     memberUserId = event.user.id,
@@ -656,6 +703,7 @@ internal class ChannelLogic(
                     shadow = false,
                 )
             }
+
             is NotificationChannelDeletedEvent,
             is NotificationInvitedEvent,
             is ConnectedEvent,
@@ -671,51 +719,65 @@ internal class ChannelLogic(
             is UserDeletedEvent,
             -> Unit // Ignore these events
             is PollClosedEvent -> {
-                upsertEventMessage(event.message)
+                upsertEventMessage(cid = event.cid, poll = event.poll)
             }
+
             is PollDeletedEvent -> {
-                upsertEventMessage(event.message)
+                upsertEventMessage(cid = event.cid, poll = event.poll)
             }
+
             is PollUpdatedEvent -> {
-                upsertEventMessage(event.message)
+                Log.e("Test", "PollUpdatedEvent")
+                upsertEventMessage(poll = event.poll, cid = event.cid)
             }
+
             is VoteCastedEvent -> {
+                val (type, id) = event.cid.cidToTypeAndId()
+                val message = mutableState.getMessageById(id) ?: return
                 val ownVotes =
                     (
-                        mutableState.getMessageById(event.message.id)?.poll?.ownVotes?.associateBy { it.id }
+                        message?.poll?.ownVotes?.associateBy { it.id }
                             ?: emptyMap()
                         ) +
                         listOfNotNull(event.newVote.takeIf { it.user?.id == currentUserId }).associateBy { it.id }
 
                 upsertEventMessage(
-                    event.message.copy(
+                    message.copy(
                         poll = event.poll.copy(
                             ownVotes = ownVotes.values.toList(),
                         ),
                     ),
                 )
+                upsertEventMessage(cid = event.cid, poll = event.poll)
             }
+
             is VoteChangedEvent -> {
-                val ownVotes = event.newVote.takeIf { it.user?.id == currentUserId }?.let { listOf(it) } ?: getMessage(
-                    event.message.id,
-                )?.poll?.ownVotes
+                val (type, id) = event.cid.cidToTypeAndId()
+                Log.e("Test", "VoteChangedEventsssss, cid: ${event.cid}, message: ${getMessage(id)}")
+                val message = getMessage(id) ?: return
+                val ownVotes =
+                    event.newVote.takeIf { it.user?.id == currentUserId }?.let { listOf(it) } ?: message.poll?.ownVotes
 
                 upsertEventMessage(
-                    event.message.copy(
+                    message.copy(
                         poll = event.poll.copy(
                             ownVotes = ownVotes ?: emptyList(),
                         ),
                     ),
                 )
+                upsertEventMessage(cid = event.cid, poll = event.poll)
             }
+
             is VoteRemovedEvent -> {
+                val (type, id) = event.cid.cidToTypeAndId()
+                val message = mutableState.getMessageById(id) ?: return
                 val ownVotes =
                     (
-                        mutableState.getMessageById(event.message.id)?.poll?.ownVotes?.associateBy { it.id }
+                        message.poll?.ownVotes?.associateBy { it.id }
                             ?: emptyMap()
                         ) - event.removedVote.id
                 upsertEventMessage(
-                    event.message.copy(
+                    message.copy(
                         poll = event.poll.copy(
                             ownVotes = ownVotes.values.toList(),
                         ),

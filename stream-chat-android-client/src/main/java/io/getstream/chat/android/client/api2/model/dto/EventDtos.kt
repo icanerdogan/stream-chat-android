@@ -466,9 +466,6 @@ internal data class UserUpdatedEventDto(
 internal data class PollUpdatedEventDto(
     val type: String,
     val cid: String,
-    val channel_type: String,
-    val channel_id: String,
-    val message: DownstreamMessageDto,
     val poll: DownstreamPollDto,
     val created_at: ExactDate,
 ) : ChatEventDto()
@@ -478,7 +475,6 @@ internal data class PollDeletedEventDto(
     val type: String,
     val cid: String,
     val created_at: ExactDate,
-    val message: DownstreamMessageDto,
     val poll: DownstreamPollDto,
 ) : ChatEventDto()
 
@@ -487,7 +483,6 @@ internal data class PollClosedEventDto(
     val type: String,
     val cid: String,
     val created_at: ExactDate,
-    val message: DownstreamMessageDto,
     val poll: DownstreamPollDto,
 ) : ChatEventDto()
 
@@ -496,7 +491,6 @@ internal data class VoteCastedEventDto(
     val type: String,
     val cid: String,
     val created_at: ExactDate,
-    val message: DownstreamMessageDto,
     val poll: DownstreamPollDto,
     val poll_vote: DownstreamVoteDto,
 ) : ChatEventDto()
@@ -506,7 +500,6 @@ internal data class VoteChangedEventDto(
     val type: String,
     val cid: String,
     val created_at: ExactDate,
-    val message: DownstreamMessageDto,
     val poll: DownstreamPollDto,
     val poll_vote: DownstreamVoteDto,
 ) : ChatEventDto()
@@ -516,7 +509,6 @@ internal data class VoteRemovedEventDto(
     val type: String,
     val cid: String,
     val created_at: ExactDate,
-    val message: DownstreamMessageDto,
     val poll: DownstreamPollDto,
     val poll_vote: DownstreamVoteDto,
 ) : ChatEventDto()

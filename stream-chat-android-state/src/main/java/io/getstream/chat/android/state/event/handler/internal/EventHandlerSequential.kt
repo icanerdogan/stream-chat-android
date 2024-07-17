@@ -16,6 +16,7 @@
 
 package io.getstream.chat.android.state.event.handler.internal
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.getstream.chat.android.client.ChatEventListener
 import io.getstream.chat.android.client.events.ChannelDeletedEvent
@@ -28,6 +29,7 @@ import io.getstream.chat.android.client.events.ChannelUserUnbannedEvent
 import io.getstream.chat.android.client.events.ChannelVisibleEvent
 import io.getstream.chat.android.client.events.ChatEvent
 import io.getstream.chat.android.client.events.CidEvent
+import io.getstream.chat.android.client.events.CidEvent2
 import io.getstream.chat.android.client.events.ConnectedEvent
 import io.getstream.chat.android.client.events.GlobalUserBannedEvent
 import io.getstream.chat.android.client.events.GlobalUserUnbannedEvent
@@ -378,6 +380,20 @@ internal class EventHandlerSequential(
                 }
             }
 
+        // step 4 - forward the events to the active channels
+        sortedEvents.filterIsInstance<CidEvent2>()
+            .groupBy { it.cid }
+            .forEach { (cid, events) ->
+                val (channelType, channelId) = cid.cidToTypeAndId()
+                if (logicRegistry.isActiveChannel(channelType = channelType, channelId = channelId)) {
+                    val channelLogic: ChannelLogic = logicRegistry.channel(
+                        channelType = channelType,
+                        channelId = channelId,
+                    )
+                    channelLogic.handleEvents(events)
+                }
+            }
+
         // mark all read applies to all channels
         sortedEvents.filterIsInstance<MarkAllReadEvent>().lastOrNull()?.let { markAllRead ->
             logicRegistry.getActiveChannelsLogic().forEach { channelLogic: ChannelLogic ->
@@ -444,6 +460,15 @@ internal class EventHandlerSequential(
             cidEvents
                 .filter { it is ChannelDeletedEvent || it is NotificationChannelDeletedEvent }
                 .map { it.cid },
+        )
+
+        val cidEvent2s = events.filterIsInstance<CidEvent2>()
+        batchBuilder.addToFetchChannels(
+            cidEvent2s.map { it.cid },
+        )
+
+        batchBuilder.addToRemoveChannels(
+            cidEvent2s.map { it.cid },
         )
 
         val users: List<User> = events.filterIsInstance<UserEvent>().map { it.user } +
@@ -673,22 +698,25 @@ internal class EventHandlerSequential(
                     repos.insertCurrentUser(event.user)
                 }
                 is PollClosedEvent -> {
-                    batch.addMessage(event.message)
+                    batch.addMessageWithLookUp(event.cid, event.poll, event.createdAt)
                 }
                 is PollDeletedEvent -> {
-                    batch.addMessage(event.message)
+                    batch.addMessageWithLookUp(event.cid, event.poll, event.createdAt)
                 }
                 is PollUpdatedEvent -> {
-                    batch.addMessage(event.message)
+                    Log.e("Test", "PollUpdatedEvent: $event")
+                    batch.addMessageWithLookUp(event.cid, event.poll, event.createdAt)
                 }
                 is VoteCastedEvent -> {
-                    batch.addMessage(event.message)
+                    Log.e("Test", "VoteCastedEvent: $event")
+                    batch.addMessageWithLookUp(event.cid, event.poll, event.createdAt)
                 }
                 is VoteChangedEvent -> {
-                    batch.addMessage(event.message)
+                    Log.e("Test", "VoteChangedEvent: $event")
+                    batch.addMessageWithLookUp(event.cid, event.poll, event.createdAt)
                 }
                 is VoteRemovedEvent -> {
-                    batch.addMessage(event.message)
+                    batch.addMessageWithLookUp(event.cid, event.poll, event.createdAt)
                 }
                 else -> Unit
             }
