@@ -68,11 +68,13 @@ import io.getstream.chat.android.ui.common.state.messages.Delete
 import io.getstream.chat.android.ui.common.state.messages.MarkAsUnread
 import io.getstream.chat.android.ui.common.state.messages.MessageAction
 import io.getstream.chat.android.ui.common.state.messages.MessageMode
+import io.getstream.chat.android.ui.common.state.messages.MuteUser
 import io.getstream.chat.android.ui.common.state.messages.Pin
 import io.getstream.chat.android.ui.common.state.messages.React
 import io.getstream.chat.android.ui.common.state.messages.Reply
 import io.getstream.chat.android.ui.common.state.messages.Resend
 import io.getstream.chat.android.ui.common.state.messages.ThreadReply
+import io.getstream.chat.android.ui.common.state.messages.UpdateUser
 import io.getstream.chat.android.ui.common.state.messages.list.CancelGiphy
 import io.getstream.chat.android.ui.common.state.messages.list.DateSeparatorItemState
 import io.getstream.chat.android.ui.common.state.messages.list.DeletedMessageVisibility
@@ -1493,8 +1495,18 @@ public class MessageListController(
             is React -> reactToMessage(messageAction.reaction, messageAction.message)
             is Pin -> updateMessagePin(messageAction.message)
             is MarkAsUnread -> markUnread(messageAction.message)
+            is MuteUser -> muteUser(messageAction.message.user.id)
+            is UpdateUser -> updateUser(user.value)
             else -> {
                 // no op, custom user action
+            }
+        }
+    }
+
+    private fun updateUser(user: User?) {
+        user?.let {
+            chatClient.updateUser(it).enqueue {
+                logger.d { "Update user result: $it" }
             }
         }
     }

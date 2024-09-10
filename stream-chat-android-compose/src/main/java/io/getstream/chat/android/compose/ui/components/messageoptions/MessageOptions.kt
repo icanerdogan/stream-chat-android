@@ -47,10 +47,12 @@ import io.getstream.chat.android.ui.common.state.messages.Delete
 import io.getstream.chat.android.ui.common.state.messages.Edit
 import io.getstream.chat.android.ui.common.state.messages.Flag
 import io.getstream.chat.android.ui.common.state.messages.MarkAsUnread
+import io.getstream.chat.android.ui.common.state.messages.MuteUser
 import io.getstream.chat.android.ui.common.state.messages.Pin
 import io.getstream.chat.android.ui.common.state.messages.Reply
 import io.getstream.chat.android.ui.common.state.messages.Resend
 import io.getstream.chat.android.ui.common.state.messages.ThreadReply
+import io.getstream.chat.android.ui.common.state.messages.UpdateUser
 import io.getstream.chat.android.uiutils.extension.hasLink
 
 /**
@@ -248,6 +250,28 @@ public fun defaultMessageOptionsState(
                 title = R.string.stream_compose_block_user,
                 iconPainter = painterResource(R.drawable.stream_compose_ic_clear),
                 action = BlockUser(selectedMessage),
+                iconColor = ChatTheme.colors.textLowEmphasis,
+                titleColor = ChatTheme.colors.textHighEmphasis,
+            )
+        } else {
+            null
+        },
+        if (!isOwnMessage) {
+            MessageOptionItemState(
+                title = R.string.stream_compose_mute_user,
+                iconPainter = painterResource(R.drawable.stream_compose_ic_mute),
+                action = MuteUser(selectedMessage),
+                iconColor = ChatTheme.colors.textLowEmphasis,
+                titleColor = ChatTheme.colors.textHighEmphasis,
+            )
+        } else {
+            null
+        },
+        if (!isOwnMessage) {
+            MessageOptionItemState(
+                title = R.string.stream_compose_user_update,
+                iconPainter = painterResource(R.drawable.stream_compose_ic_person),
+                action = UpdateUser(selectedMessage),
                 iconColor = ChatTheme.colors.textLowEmphasis,
                 titleColor = ChatTheme.colors.textHighEmphasis,
             )

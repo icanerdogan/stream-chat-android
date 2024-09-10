@@ -103,6 +103,10 @@ public data class Flag(
  */
 public data class BlockUser(override val message: Message) : MessageAction()
 
+public data class MuteUser(override val message: Message) : MessageAction()
+
+public data class UpdateUser(override val message: Message) : MessageAction()
+
 /**
  * User-customizable action, with any number of extra properties.
  *
@@ -127,5 +131,7 @@ public fun MessageAction.updateMessage(message: Message): MessageAction {
         is Flag -> copy(message = message)
         is CustomAction -> copy(message = message)
         is BlockUser -> copy(message = message)
+        is MuteUser -> copy(message = message)
+        is UpdateUser -> copy(message = message)
     }
 }
