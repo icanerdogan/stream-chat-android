@@ -12,7 +12,7 @@
 
 ## stream-chat-android-client
 ### 🐞 Fixed
-- Fix `ChatClient::queryBlockedMembers` not working. [#5532](https://github.com/GetStream/stream-chat-android/pull/5532)
+- Fix `ChatClient::queryBlockedUsers` not working. [#5532](https://github.com/GetStream/stream-chat-android/pull/5532)
 - Fix `ChatClient::blockUser` and `ChatClient::unblockUser` response parsing. [#5532](https://github.com/GetStream/stream-chat-android/pull/5532)
 - Fix rare bug where the `ConnectivityState` is not updated to `Offline` after disconnecting the device from network. [#5538](https://github.com/GetStream/stream-chat-android/pull/5538)
 
@@ -51,6 +51,7 @@
 
 ## stream-chat-android-ui-common
 ### 🐞 Fixed
+- Fix `MessageListController` not respecting the `showSystemMessages` property when set to `false`. [#5546](https://github.com/GetStream/stream-chat-android/pull/5546)
 
 ### ⬆️ Improved
 
@@ -81,6 +82,7 @@
 - Add "Unblock user" message menu option shown for messages from blocked users. [#5533](https://github.com/GetStream/stream-chat-android/pull/5533)
 
 ### ⚠️ Changed
+- Replace usage of `material` with `material3` components. [#5537](https://github.com/GetStream/stream-chat-android/pull/5537)
 
 ### ❌ Removed
 
